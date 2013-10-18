@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Huaxingtan</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+	<string name="action_search">搜索</string>
+	<string name="tab_online">在线经文</string>
+	<string name="tab_local">本地经文</string>
+</resources>
