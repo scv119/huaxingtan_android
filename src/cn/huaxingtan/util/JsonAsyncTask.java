@@ -1,4 +1,4 @@
-package cn.huaxingtan.player.util;
+package cn.huaxingtan.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,11 +37,11 @@ public abstract class JsonAsyncTask extends AsyncTask<String, Integer, Object>{
 			}
 			mRet = Json.loads(sb.toString());
 		} catch(ClientProtocolException e) {
-			Log.e(LOG, "", e);
+			Log.e(LOG, "NETWORK", e);
 		} catch (IOException e) {
-			Log.e(LOG, "", e);
+			Log.e(LOG, "NETWORK", e);
 		} catch (Exception e) {
-			Log.e(LOG, "", e);
+			Log.e(LOG, "NETWORK", e);
 		} finally {
 			try {
 				if (reader != null)

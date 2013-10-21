@@ -1,4 +1,4 @@
-package cn.huaxingtan.player.util;
+package cn.huaxingtan.util;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;

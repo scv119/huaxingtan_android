@@ -1,5 +1,6 @@
-package cn.huaxingtan.player;
+package cn.huaxingtan.view;
 
+import cn.huaxingtan.player.R;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;

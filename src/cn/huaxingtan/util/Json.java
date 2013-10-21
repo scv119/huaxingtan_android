@@ -1,4 +1,4 @@
-package cn.huaxingtan.player.util;
+package cn.huaxingtan.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
