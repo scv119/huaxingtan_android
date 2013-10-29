@@ -5,7 +5,12 @@ import java.util.Map;
 
 public class AudioItem implements Serializable{
 
+	public static enum Status {
+		STOPED, QUEUED, STARTED, FINISHED, 
+	}
+	
 	private static final long serialVersionUID = 3110886420315494447L;
+	
 	
 	private String name;
 	private String detail;
@@ -20,6 +25,8 @@ public class AudioItem implements Serializable{
 	private long fileId;
 	private long finishedSize;
 	private String path;
+	private Status status;
+	
 	
 	public String getName() {
 		return name;
@@ -99,6 +106,12 @@ public class AudioItem implements Serializable{
 	public void setPath(String path) {
 		this.path = path;
 	}
+	public Status getStatus() {
+		return status;
+	}
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 	
 
 	@SuppressWarnings("rawtypes")
@@ -118,7 +131,9 @@ public class AudioItem implements Serializable{
 		item.duration = (int)tmp;
 		tmp = (Double) map.get("id");
 		item.fileId = (long) tmp;
+		item.status = Status.STOPED;
 		return item;
 	}
+	
 	
 }

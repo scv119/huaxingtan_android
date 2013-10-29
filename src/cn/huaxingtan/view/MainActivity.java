@@ -1,11 +1,13 @@
 package cn.huaxingtan.view;
 
 import cn.huaxingtan.player.R;
+import cn.huaxingtan.service.MusicPlayerService;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +20,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		final ActionBar bar = getActionBar();
+		startService(new Intent(this, MusicPlayerService.class));
 		bar.addTab(bar.newTab()
 				.setText(R.string.tab_online)
 				.setTabListener(new TabListener<OnlineFragment>(

@@ -15,7 +15,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 public abstract class JsonAsyncTask extends AsyncTask<String, Integer, Object>{
-	private static final String LOG = JsonAsyncTask.class.getName();
+	private static final String TAG = JsonAsyncTask.class.getName();
 	@Override
 	protected Object doInBackground(String... params) {
 		Object mRet = null;
@@ -37,11 +37,11 @@ public abstract class JsonAsyncTask extends AsyncTask<String, Integer, Object>{
 			}
 			mRet = Json.loads(sb.toString());
 		} catch(ClientProtocolException e) {
-			Log.e(LOG, "NETWORK", e);
+			Log.e(TAG, "NETWORK", e);
 		} catch (IOException e) {
-			Log.e(LOG, "NETWORK", e);
+			Log.e(TAG, "NETWORK", e);
 		} catch (Exception e) {
-			Log.e(LOG, "NETWORK", e);
+			Log.e(TAG, "NETWORK", e);
 		} finally {
 			try {
 				if (reader != null)

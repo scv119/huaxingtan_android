@@ -12,4 +12,19 @@
         android:id="@+id/item_content"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent" />
+<!--     <Button
+        android:id="@+id/button_download"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/action_download" />
+    <Button
+        android:id="@+id/button_cancel"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/action_cancel" />
+    <Button
+        android:id="@+id/button_delete"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/action_delete" />  -->
 </LinearLayout>
