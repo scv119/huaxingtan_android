@@ -21,12 +21,13 @@ import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-public class OnlineFragment extends ListFragment implements ServiceConnection{
+public class OnlineFragment extends ListFragment {
 	private static final String LOG = OnlineFragment.class.getCanonicalName();
 	private List<AudioItem> mData;
 	private AudioJsonAsyncTask mTask;
 	private AudioItemAdapter mAdapter;
-	private MusicPlayerService mPlayerService;
+	
+	public static final String EXTRA = "AudioItem";
 	
 	@Override 
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -36,23 +37,22 @@ public class OnlineFragment extends ListFragment implements ServiceConnection{
 			mAdapter = new AudioItemAdapter(this.getActivity(), mData);
 			setListAdapter(mAdapter);
 			mTask = new AudioJsonAsyncTask(mData, mAdapter);
-			Log.e(LOG, "fragment start load data");
+			Log.i(LOG, "fragment start load data");
 			mTask.execute("http://huaxingtan.cn/api?version=1.0");
 		}
-		getActivity().getApplicationContext().bindService(new Intent(getActivity(),  MusicPlayerService.class),
-				this, Context.BIND_AUTO_CREATE);
 	}
 	
 	@Override
 	public void onDestroy() {
-		getActivity().getApplicationContext().unbindService(this);
 		super.onDestroy();
 	}
 	
 	@Override
     public void onListItemClick(ListView l, View v, int position, long id) {
 		AudioItem item = mData.get(position);
-		this.mPlayerService.setAudioItem(item, null, null, null, null, null);
+		Intent musicIntent = new Intent(getActivity(), MusicPlayerActivity.class);
+		musicIntent.putExtra(EXTRA, item);
+		startActivity(musicIntent);
     }
 	
 	private static class AudioJsonAsyncTask extends JsonAsyncTask {
@@ -81,14 +81,6 @@ public class OnlineFragment extends ListFragment implements ServiceConnection{
 	    }
 	}
 
-	@Override
-	public void onServiceConnected(ComponentName name, IBinder service) {
-		this.mPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
-	}
-
-	@Override
-	public void onServiceDisconnected(ComponentName name) {
-		this.mPlayerService = null;
-	}
+	
 	
 }

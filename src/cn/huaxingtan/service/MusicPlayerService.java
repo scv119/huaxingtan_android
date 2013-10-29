@@ -31,6 +31,7 @@ public class MusicPlayerService extends Service {
 			mMediaPlayer.reset();
 		else
 			mMediaPlayer = new MediaPlayer();
+		Log.i(TAG, "music player service started");
 	}
 	
 	@Override
@@ -67,18 +68,24 @@ public class MusicPlayerService extends Service {
 			Log.d(TAG, "failed to load "+URI, e);
 			return false;
 		}
+		
 		if (onPreparedListener != null)
 			mMediaPlayer.setOnPreparedListener(onPreparedListener);
-		if (onBufferingUpdateListener != null)
-			mMediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
-		if (onSeekCompleteListener != null)
-			mMediaPlayer.setOnSeekCompleteListener(onSeekCompleteListener);
+
 		if (onErrorListener != null)
 			mMediaPlayer.setOnErrorListener(onErrorListener);
+
+		mMediaPlayer.prepareAsync();
+		
+		if (onBufferingUpdateListener != null)
+			mMediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
+		
+		if (onSeekCompleteListener != null)
+			mMediaPlayer.setOnSeekCompleteListener(onSeekCompleteListener);
+		
 		if (onCompletionListener != null)
 			mMediaPlayer.setOnCompletionListener(onCompletionListener);
 		
-		mMediaPlayer.prepareAsync();
 		return true;
 	}
 	
