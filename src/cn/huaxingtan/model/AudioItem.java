@@ -16,6 +16,7 @@ public class AudioItem implements Serializable{
 	private String detail;
 	private String serialName;
 	private String serialNO;
+	private int serialId;
 	private String author;
 	private String coverUrl;
 	private String fileUrl;
@@ -114,6 +115,12 @@ public class AudioItem implements Serializable{
 	}
 	
 
+	public int getSerialId() {
+		return serialId;
+	}
+	public void setSerialId(int serialId) {
+		this.serialId = serialId;
+	}
 	@SuppressWarnings("rawtypes")
 	public static AudioItem loadJson(Object o) {
 		assert(o instanceof Map);
@@ -131,6 +138,8 @@ public class AudioItem implements Serializable{
 		item.duration = (int)tmp;
 		tmp = (Double) map.get("id");
 		item.fileId = (long) tmp;
+		tmp = (Double) map.get("serialId");
+		item.serialId = (int) tmp;
 		item.status = Status.STOPED;
 		return item;
 	}
