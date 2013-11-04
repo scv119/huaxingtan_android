@@ -36,7 +36,7 @@ public class MusicPlayerActivity extends Activity implements OnPreparedListener,
 		super.onCreate(savedInstanceState);
 
 		Intent musicIntent = getIntent();
-		mAudioItem = (AudioItem)musicIntent.getExtras().get(OnlineFragment.EXTRA);
+		mAudioItem = (AudioItem)musicIntent.getExtras().get("AudioItem");
 
 		setContentView(R.layout.activity_music_player);
 		mSeekBar = (SeekBar)findViewById(R.id.music_seekBar);

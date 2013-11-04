@@ -7,6 +7,7 @@ import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
+import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
 import cn.huaxingtan.util.JsonAsyncTask;
 
@@ -21,52 +22,68 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
 
-public class OnlineFragment extends ListFragment {
-	private static final String LOG = OnlineFragment.class.getCanonicalName();
+public class OnlineFragment extends Fragment {
+	private static final String TAG = OnlineFragment.class.getCanonicalName();
 	private List<Serial> mData;
-	private SerialAdapter mAdapter;
+	private GridItemAdapter mAdapter;
 	private CachedDataProvider mDataProvider;
 	
-	public static final String EXTRA = "AudioItem";
 	
 	@Override 
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		if (mData == null) {
-			mData = new ArrayList<Serial>();
-			mAdapter = new SerialAdapter(this.getActivity(), mData);
-			setListAdapter(mAdapter);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.online_fragment, null);
+		GridView gridView = (GridView) v.findViewById(R.id.grid_view);
+		mData = new ArrayList<Serial>();
+		mAdapter = new GridItemAdapter(inflater, mData);
+		gridView.setAdapter(mAdapter);
+		gridView.setOnItemClickListener(new OnItemClickListener(){
 
-			Log.i(LOG, "fragment start load data");
-			mDataProvider = CachedDataProvider.INSTANCE;
-			mDataProvider.getSerials(new Callback(){
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Log.i(TAG, "item clicked");
+			}
+			
+		});
+		
+		Log.i(TAG, "fragment start load data");
+		mDataProvider = CachedDataProvider.INSTANCE;
+		mDataProvider.getSerials(new Callback(){
 
-				@Override
-				public void success(Object result) {
-					List<Serial> list = (List<Serial>) result;
-					if (list.size() == 0)
-						return;
-					
-					mData.clear();
-					for (Serial o:list) {
-						mData.add(o);
-					}
-					mAdapter.notifyDataSetChanged();
-					
-				}
-
-				@Override
-				public void fail(Exception e) {
-				}
+			@Override
+			public void success(Object result) {
+				List<Serial> list = (List<Serial>) result;
+				if (list.size() == 0)
+					return;
 				
-			});
-//			
-//			mTask = new AudioJsonAsyncTask(mData, mAdapter);
-//			mTask.execute("http://huaxingtan.cn/api?version=1.0");
-		}
+				mData.clear();
+				for (Serial o:list) {
+					
+					mData.add(o);
+					mData.add(o);
+					mData.add(o);
+					mData.add(o);
+				}
+				mAdapter.notifyDataSetChanged();
+				
+			}
+
+			@Override
+			public void fail(Exception e) {
+			}
+			
+		});
+		
+		return v;
+		
 	}
 	
 	@Override
@@ -74,12 +91,5 @@ public class OnlineFragment extends ListFragment {
 		super.onDestroy();
 	}
 	
-	@Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-		Serial item = mData.get(position);
-//		Intent musicIntent = new Intent(getActivity(), MusicPlayerActivity.class);
-//		musicIntent.putExtra(EXTRA, item);
-//		startActivity(musicIntent);
-    }
 	
 }

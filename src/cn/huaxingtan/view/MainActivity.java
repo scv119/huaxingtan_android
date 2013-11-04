@@ -27,8 +27,8 @@ public class MainActivity extends Activity {
 						this, "online", OnlineFragment.class)));
 		bar.addTab(bar.newTab()
 				.setText(R.string.tab_local)
-				.setTabListener(new TabListener<OnlineFragment>(
-						this, "local", OnlineFragment.class)));
+				.setTabListener(new TabListener<OfflineFragment>(
+						this, "local", OfflineFragment.class)));
 		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 	}
 
