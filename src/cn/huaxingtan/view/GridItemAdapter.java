@@ -4,6 +4,7 @@ import java.util.List;
 
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.util.ImageDownloader;
+import cn.huaxingtan.util.ImageDownloader.Mode;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +17,11 @@ import cn.huaxingtan.model.Serial;
 public class GridItemAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
 	private List<Serial> mData;
-	private final ImageDownloader imageDownloader = new ImageDownloader();
+	private static final ImageDownloader imageDownloader = new ImageDownloader();
+	static {
+
+		imageDownloader.setMode(Mode.NO_DOWNLOADED_DRAWABLE);
+	}
 	
 	public GridItemAdapter(LayoutInflater inflater, List<Serial> data) {
 		this.mInflater = inflater;

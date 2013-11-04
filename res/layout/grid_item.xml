@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cn.huaxingtan.util.SquareLayout   
+         xmlns:android="http://schemas.android.com/apk/res/android"   
+         android:layout_height="wrap_content" 
+         android:padding="10dp"  android:layout_width="fill_parent">  
+         <ImageView   
+               android:layout_height="fill_parent"   
+               android:id="@+id/grid_image"   
+               android:layout_width="fill_parent"   
+               android:layout_centerHorizontal="true">   
+         </ImageView>  
+         <TextView   
+               android:layout_width="fill_parent"    
+               android:layout_height="wrap_content"   
+			   android:layout_gravity="bottom"
+			   android:gravity="right"
+               android:text=""   
+               android:layout_centerHorizontal="true" 
+               android:layout_marginBottom="2dp"  
+               android:layout_marginRight="10dp"
+               android:id="@+id/grid_text">  
+              
+         </TextView>  
+</cn.huaxingtan.util.SquareLayout>  

@@ -37,7 +37,8 @@ public class AudioItemAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		convertView = mInflater.inflate(R.layout.list_item, null);
+		if (convertView == null)
+			convertView = mInflater.inflate(R.layout.list_item, null);
 		TextView title = (TextView) convertView.findViewById(R.id.item_title);
 		title.setText(mData.get(position).getName());
 		TextView content = (TextView)convertView.findViewById(R.id.item_content);

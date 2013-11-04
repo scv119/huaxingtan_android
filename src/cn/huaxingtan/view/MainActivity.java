@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends Activity {
-	
+	private Menu mMenu;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,12 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
+		mMenu = menu;
 		getMenuInflater().inflate(R.menu.main, menu);
+		
+		MenuItem settingItem = menu.findItem(R.id.action_settings);
+		settingItem.setOnMenuItemClickListener(new OnSettingClickedListener(this));
+		
 		return super.onCreateOptionsMenu(menu);
 	}
 
