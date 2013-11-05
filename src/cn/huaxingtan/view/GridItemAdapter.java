@@ -17,12 +17,11 @@ import cn.huaxingtan.model.Serial;
 public class GridItemAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
 	private List<Serial> mData;
-	private static final ImageDownloader imageDownloader = new ImageDownloader();
-	static {
+    private static final ImageDownloader mImageDownloader = new ImageDownloader();
+    static {
+    	mImageDownloader.setMode(Mode.CORRECT);
+    }
 
-		imageDownloader.setMode(Mode.NO_DOWNLOADED_DRAWABLE);
-	}
-	
 	public GridItemAdapter(LayoutInflater inflater, List<Serial> data) {
 		this.mInflater = inflater;
 		this.mData = data;
@@ -51,7 +50,7 @@ public class GridItemAdapter extends BaseAdapter {
 		title.setText(mData.get(position).getName());
 		ImageView image = (ImageView)convertView.findViewById(R.id.grid_image);
 		image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-		imageDownloader.download(mData.get(position).getCoverUrl(), image);
+		mImageDownloader.download(mData.get(position).getCoverUrl(), image);
 		return convertView;
 	}
 	

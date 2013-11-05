@@ -1,5 +1,6 @@
 package cn.huaxingtan.view;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import cn.huaxingtan.model.Serial;
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
 import cn.huaxingtan.util.JsonAsyncTask;
+import cn.huaxingtan.util.Serialize;
 
 import android.app.Fragment;
 import android.app.ListFragment;
@@ -33,7 +35,7 @@ public class OnlineFragment extends Fragment {
 	private static final String TAG = OnlineFragment.class.getCanonicalName();
 	private List<Serial> mData;
 	private GridItemAdapter mAdapter;
-	private CachedDataProvider mDataProvider;
+	private CachedDataProvider mDataProvider = CachedDataProvider.INSTANCE;
 	
 	
 	@Override 
@@ -50,12 +52,20 @@ public class OnlineFragment extends Fragment {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				Log.i(TAG, "item clicked");
+				Serial item = mData.get(position);
+				Intent intent = new Intent(getActivity(), DetailActivity.class);
+				byte[] bytes;
+				try {
+					bytes = Serialize.serialize(item);
+					intent.putExtra("Serial", bytes);
+					startActivity(intent);
+				} catch (IOException e) {
+					Log.e(TAG, "fail to serialize", e);
+				}
 			}
-			
 		});
 		
 		Log.i(TAG, "fragment start load data");
-		mDataProvider = CachedDataProvider.INSTANCE;
 		mDataProvider.getSerials(new Callback(){
 
 			@Override

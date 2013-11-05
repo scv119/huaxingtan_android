@@ -44,27 +44,6 @@ public class MainActivity extends Activity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.action_play:
-				openPlaying();
-				return true;
-			case R.id.action_settings:
-				openSettings();
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
-		}
-	}
-	
-	private void openPlaying() {
-		
-	}
-	
-	private void openSettings() {
-		
-	}
 	
 	public static class TabListener<T extends Fragment> implements ActionBar.TabListener {
 		private final Activity mActivity;

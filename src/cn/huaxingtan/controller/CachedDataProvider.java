@@ -87,7 +87,8 @@ public enum CachedDataProvider {
 			}
 			for (Integer key:map.keySet())
 				mCache.put(key, new Timestamped(map.get(key)));
-			this.mCallback.success(mCache.get(mKey));
+			this.mCallback.success(mCache.get(mKey).value
+					);
 	    }
 	}
 	

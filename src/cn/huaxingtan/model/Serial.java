@@ -1,8 +1,12 @@
 package cn.huaxingtan.model;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class Serial {
+public class Serial implements Serializable{
+
+	private static final long serialVersionUID = -1985674208677707499L;
+	
 	private int id;
 	private String name;
 	private long duration;

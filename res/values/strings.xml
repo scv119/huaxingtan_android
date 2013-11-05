@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Huaxingtan</string>
+    <string name="app_name">化性談</string>
     <string name="action_settings">設置</string>
     <string name="action_download">下載</string>
     <string name="setting_feedback">反饋建議</string>
