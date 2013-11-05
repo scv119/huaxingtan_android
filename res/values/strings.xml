@@ -4,11 +4,16 @@
     <string name="app_name">Huaxingtan</string>
     <string name="action_settings">設置</string>
     <string name="action_download">下載</string>
+    <string name="setting_feedback">反饋建議</string>
+    <string name="setting_celldata">使用移動數據</string>
+    <string name="setting_backplay">後台播放</string>
+    <string name="setting_backdownload">後台下載</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_search">搜索</string>
     <string name="tab_online">在线经文</string>
     <string name="tab_local">本地经文</string>
     <string name="action_cancel">取消</string>
+    <string name="finish">完成</string>
     <string name="action_delete">删除</string>
     <string name="title_activity_music_player">MusicPlayerActivity</string>
 

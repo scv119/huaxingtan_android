@@ -15,6 +15,7 @@
 			   android:layout_gravity="bottom"
 			   android:gravity="right"
                android:text=""   
+               android:textSize="15sp"
                android:layout_centerHorizontal="true" 
                android:layout_marginBottom="2dp"  
                android:layout_marginRight="10dp"
