@@ -124,6 +124,14 @@ public class FileManager {
 		return list;
 	}
 	
+	public List<AudioItem> getAudioItems(int serialId) {
+		List<AudioItem> list = new ArrayList<AudioItem>();
+		List<AudioItem> tmp = audioItemBySerialIdCache.get(serialId);
+		if (tmp != null)
+			list.addAll(tmp);
+		return list;
+	}
+	
 	public void set(Serial item) {
 		synchronized(FileManager.class) {
 			serialCache.put(item.getId(), item);

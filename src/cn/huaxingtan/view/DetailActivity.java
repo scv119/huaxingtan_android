@@ -7,6 +7,7 @@ import java.util.List;
 
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
+import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
 
@@ -44,8 +45,10 @@ public class DetailActivity extends Activity {
 	private View mHeaderView;
 	private ListView mListView;
 	private List<AudioItem> mData;
+	private boolean mOffline = false;
 
 	private CachedDataProvider mDataProvider = CachedDataProvider.INSTANCE;
+	private FileManager mFileManager;
 	private DetailAdapter mAdapter;
 	
 	@Override
@@ -56,8 +59,10 @@ public class DetailActivity extends Activity {
 		
 		setContentView(R.layout.activity_detail);
 		mData = new ArrayList<AudioItem>();
+		mFileManager = new FileManager(this);
 		Intent intent = getIntent();
 		byte[] bytes = (byte[])intent.getExtras().get("Serial");
+		mOffline = intent.getExtras().getBoolean("isOffline");
 		try {
 			mSerial = (Serial) Serialize.deserialize(bytes);
 		} catch (Exception e) {
@@ -85,28 +90,37 @@ public class DetailActivity extends Activity {
 		mAdapter = new DetailAdapter(this, mData);
 		mListView.setAdapter(mAdapter);
 		
-		mDataProvider.getAudiosBySerial(mSerial.getId(), new Callback(){
-
-			@Override
-			public void success(Object result) {
-				List<AudioItem> list = (List<AudioItem>) result;
-				if (list.size() == 0)
-					return;
-				
-				mData.clear();
-				for (AudioItem o:list) {
+		if (mOffline) {
+			List<AudioItem> items = mFileManager.getAudioItems(mSerial.getId());
+			for (AudioItem item:items) {
+				if (item.getStatus() == AudioItem.Status.FINISHED)
+					mData.add(item);
+			}
+			mAdapter.notifyDataSetChanged();
+		} else {
+			mDataProvider.getAudiosBySerial(mSerial.getId(), new Callback(){
+	
+				@Override
+				public void success(Object result) {
+					List<AudioItem> list = (List<AudioItem>) result;
+					if (list.size() == 0)
+						return;
 					
-					mData.add(o);
+					mData.clear();
+					for (AudioItem o:list) {
+						
+						mData.add(o);
+					}
+					mAdapter.notifyDataSetChanged();
+					
 				}
-				mAdapter.notifyDataSetChanged();
+	
+				@Override
+				public void fail(Exception e) {
+				}
 				
-			}
-
-			@Override
-			public void fail(Exception e) {
-			}
-			
-		});
+			});
+		}
 		
 	}
 

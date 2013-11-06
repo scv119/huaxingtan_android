@@ -58,6 +58,7 @@ public class OnlineFragment extends Fragment {
 				try {
 					bytes = Serialize.serialize(item);
 					intent.putExtra("Serial", bytes);
+					intent.putExtra("isOffline", false);
 					startActivity(intent);
 				} catch (IOException e) {
 					Log.e(TAG, "fail to serialize", e);
