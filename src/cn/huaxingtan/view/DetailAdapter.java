@@ -4,6 +4,7 @@ import java.util.List;
 
 import cn.huaxingtan.player.R;
 import android.content.Context;
+import android.text.TextPaint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +43,12 @@ public class DetailAdapter extends BaseAdapter {
 			convertView = mInflater.inflate(R.layout.detail_item, null);
 		TextView title = (TextView) convertView.findViewById(R.id.detail_item_title);
 		title.setText(mData.get(position).getName());
+		TextPaint tp = title.getPaint(); 
+//		tp.setFakeBoldText(true);
 		TextView content = (TextView)convertView.findViewById(R.id.detail_item_info);
 		content.setText(mData.get(position).getName());
+		tp = content.getPaint(); 
+//		tp.setFakeBoldText(true);
 		return convertView;
 	}
 	

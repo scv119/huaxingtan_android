@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
+    android:layout_height="66dp"
     android:orientation="horizontal" >
 
     <ImageView
         android:id="@+id/detail_play_image"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="3dp"
@@ -18,9 +18,10 @@
         android:layout_height="wrap_content"
        	android:layout_alignParentLeft="true"
        	android:layout_alignParentTop="true"
-       	android:layout_marginLeft="26dp"
-       	android:layout_marginTop="10dp"
-       	android:textSize="22dp"
+       	android:layout_marginLeft="30dp"
+       	android:layout_marginTop="15dp"
+        android:textColor="@android:color/black"
+       	android:textSize="18dp"
         android:text="TextView" />
     
      <TextView
@@ -29,17 +30,18 @@
         android:layout_height="wrap_content"
        	android:layout_alignParentLeft="true"
        	android:layout_alignParentTop="true"
-       	android:layout_marginLeft="27dp"
-       	android:layout_marginTop="36dp"
-       	android:textSize="13dp"
+        android:textColor="@android:color/black"
+       	android:layout_marginLeft="30dp"
+       	android:layout_marginTop="39dp"
+       	android:textSize="12dp"
         android:text="TextView" />
 
      <ImageButton
         android:id="@+id/detail_item_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="15dp"
         android:layout_centerVertical="true"
         android:src="@drawable/download"
         android:background="#00000000" />

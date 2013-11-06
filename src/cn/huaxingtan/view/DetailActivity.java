@@ -23,6 +23,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -70,9 +71,13 @@ public class DetailActivity extends Activity {
 		mImageDownloader.download(mSerial.getCoverUrl(), imageView);
 		
 		TextView textView = (TextView) mHeaderView.findViewById(R.id.detail_header_name);
+		TextPaint tp = textView.getPaint(); 
+//		tp.setFakeBoldText(true);
 		textView.setText(mSerial.getName());
 		
 		textView = (TextView) mHeaderView.findViewById(R.id.detail_header_quantity);
+		tp = textView.getPaint(); 
+//		tp.setFakeBoldText(true);
 		textView.setText("共"+mSerial.getQuantity()+"講");
 		
 		mListView = (ListView)this.findViewById(R.id.detail);
