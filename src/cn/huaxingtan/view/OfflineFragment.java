@@ -5,6 +5,7 @@ import java.util.List;
 
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
+import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
 import cn.huaxingtan.service.MusicPlayerService;
@@ -28,7 +29,7 @@ public class OfflineFragment extends ListFragment {
 	private static final String LOG = OfflineFragment.class.getCanonicalName();
 	private List<Serial> mData;
 	private SerialAdapter mAdapter;
-	private CachedDataProvider mDataProvider;
+	private FileManager mFileManager;
 	
 	public static final String EXTRA = "AudioItem";
 	
@@ -37,35 +38,11 @@ public class OfflineFragment extends ListFragment {
 		super.onActivityCreated(savedInstanceState);
 		if (mData == null) {
 			mData = new ArrayList<Serial>();
+			mFileManager = new FileManager(getActivity());
+			mFileManager.getSerials();
+			
 			mAdapter = new SerialAdapter(this.getActivity(), mData);
 			setListAdapter(mAdapter);
-
-			Log.i(LOG, "fragment start load data");
-			mDataProvider = CachedDataProvider.INSTANCE;
-			mDataProvider.getSerials(new Callback(){
-
-				@Override
-				public void success(Object result) {
-					List<Serial> list = (List<Serial>) result;
-					if (list.size() == 0)
-						return;
-					
-					mData.clear();
-					for (Serial o:list) {
-						mData.add(o);
-					}
-					mAdapter.notifyDataSetChanged();
-					
-				}
-
-				@Override
-				public void fail(Exception e) {
-				}
-				
-			});
-//			
-//			mTask = new AudioJsonAsyncTask(mData, mAdapter);
-//			mTask.execute("http://huaxingtan.cn/api?version=1.0");
 		}
 	}
 	

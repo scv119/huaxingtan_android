@@ -140,6 +140,7 @@ public class AudioItem implements Serializable{
 		item.fileId = (long) tmp;
 		tmp = (Double) map.get("serialId");
 		item.serialId = (int) tmp;
+		item.path = item.fileId + ".mp3";
 		item.status = Status.STOPED;
 		return item;
 	}

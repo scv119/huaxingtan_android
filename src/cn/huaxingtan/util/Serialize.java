@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 
+import android.util.Base64;
+
 public class Serialize {
 	public static byte[] serialize(Serializable x) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();  
@@ -20,5 +22,13 @@ public class Serialize {
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);  
         ObjectInputStream ois = new ObjectInputStream(bis);  
         return ois.readObject();  
+	}
+	
+	public static String toBase64(Serializable x) throws IOException {
+		return Base64.encodeToString(serialize(x), 0);
+	}
+	
+	public static Object fromBase64(String x) throws StreamCorruptedException, IOException, ClassNotFoundException {
+		return deserialize(Base64.decode(x, 0));
 	}
 }

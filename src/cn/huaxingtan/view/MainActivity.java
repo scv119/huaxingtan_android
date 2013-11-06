@@ -1,5 +1,6 @@
 package cn.huaxingtan.view;
 
+import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
 import android.app.ActionBar;
@@ -14,10 +15,12 @@ import android.view.MenuItem;
 
 public class MainActivity extends Activity {
 	private Menu mMenu;
+	private FileManager mFileManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mFileManager = new FileManager(this);
 		setContentView(R.layout.activity_main);
 		final ActionBar bar = getActionBar();
 		startService(new Intent(this, MusicPlayerService.class));
@@ -30,6 +33,12 @@ public class MainActivity extends Activity {
 				.setTabListener(new TabListener<OfflineFragment>(
 						this, "local", OfflineFragment.class)));
 		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+	}
+	
+	@Override
+	public void onDestroy() {
+		mFileManager.save();
+		super.onDestroy();
 	}
 
 	@Override

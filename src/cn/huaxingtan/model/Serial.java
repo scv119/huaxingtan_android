@@ -12,6 +12,7 @@ public class Serial implements Serializable{
 	private long duration;
 	private int quantity;
 	private String coverUrl;
+	private int downloaded;
 	
 	
 	public int getId() {
@@ -44,7 +45,13 @@ public class Serial implements Serializable{
 	public void setCoverUrl(String coverUrl) {
 		this.coverUrl = coverUrl;
 	}
-
+	public int getDownloaded() {
+		return downloaded;
+	}
+	public void setDownloaded(int downloaded) {
+		this.downloaded = downloaded;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	public static Serial loadJson(Object o) {
 		assert(o instanceof Map);
