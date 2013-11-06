@@ -6,7 +6,7 @@ import java.util.Map;
 public class AudioItem implements Serializable{
 
 	public static enum Status {
-		STOPED, QUEUED, STARTED, FINISHED, 
+		STOPED, PAUSED, STARTED, FINISHED, 
 	}
 	
 	private static final long serialVersionUID = 3110886420315494447L;
@@ -27,6 +27,8 @@ public class AudioItem implements Serializable{
 	private long finishedSize;
 	private String path;
 	private Status status;
+	private long downloadId;
+	
 	
 	
 	public String getName() {
@@ -113,13 +115,17 @@ public class AudioItem implements Serializable{
 	public void setStatus(Status status) {
 		this.status = status;
 	}
-	
-
-	public int getSerialId() {
-		return serialId;
-	}
 	public void setSerialId(int serialId) {
 		this.serialId = serialId;
+	}
+	public long getDownloadId() {
+		return downloadId;
+	}
+	public void setDownloadId(long downloadId) {
+		this.downloadId = downloadId;
+	}
+	public int getSerialId() {
+		return serialId;
 	}
 	@SuppressWarnings("rawtypes")
 	public static AudioItem loadJson(Object o) {

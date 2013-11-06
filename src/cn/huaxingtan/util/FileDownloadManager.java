@@ -5,6 +5,7 @@ import java.util.List;
 
 import cn.huaxingtan.model.AudioItem;
 
+@Deprecated
 public enum FileDownloadManager {
 	INSTANCE;
 	
@@ -49,7 +50,7 @@ public enum FileDownloadManager {
 			}
 			
 			itemList.add(item);
-			item.setStatus(AudioItem.Status.QUEUED);
+			item.setStatus(AudioItem.Status.PAUSED);
 			notifyStartDownload();
 		}
 	}

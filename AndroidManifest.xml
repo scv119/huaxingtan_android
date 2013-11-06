@@ -42,6 +42,8 @@
         <service 
             android:name="cn.huaxingtan.service.MusicPlayerService">
         </service>
+        <receiver android:name="cn.huaxingtan.receiver.DownloadManagerReceiver">
+        </receiver>
     </application>
 
 </manifest>

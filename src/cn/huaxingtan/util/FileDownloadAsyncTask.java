@@ -16,6 +16,7 @@ import cn.huaxingtan.model.AudioItem;
 import android.os.AsyncTask;
 import android.util.Log;
 
+@Deprecated
 public class FileDownloadAsyncTask extends AsyncTask<AudioItem, AudioItem, AudioItem>{
 	private static final String LOG = FileDownloadAsyncTask.class.getName();
 	private static final int BUFFER_SIZE = 10240;

@@ -21,16 +21,17 @@ public class FileManager {
 	private static HashMap<Integer, Serial> serialCache;
 	private static HashMap<Long, AudioItem> audioItemCache;
 	private static HashMap<Integer, List<AudioItem>> audioItemBySerialIdCache;
+	private static DownloadManager mDownloadManager;
+	
 	private static final String TAG = FileManager.class.getCanonicalName();
 	private static final String P_NAME = "file_info";
 	
 	private Context mContext;
-	private DownloadManager mDownloadManager;
 	
 	
 	public FileManager(Context context) {
 		mContext = context;
-		mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+		
 		
 		if (serialCache == null) {
 			synchronized(FileManager.class) {
@@ -171,6 +172,16 @@ public class FileManager {
 		file_info.edit().putString("Serial", serial).putString("AudioItem", audioItem).commit();
 	}
 	
+	public boolean saveTmpFile(String tmpPath, long fileId) {
+		File file = new File(mContext.getFilesDir(), audioItemCache.get(fileId).getPath());
+		File f = new File(tmpPath);
+		try {
+			return f.renameTo(file);
+		} catch (Exception e) {
+			Log.e(TAG, "fail to move tmpfile " + f.getAbsolutePath() + " to " + file.getAbsolutePath(), e);
+			return false;
+		}
+	}
 	
 	
 }

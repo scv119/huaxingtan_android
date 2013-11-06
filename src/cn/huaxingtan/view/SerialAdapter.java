@@ -10,8 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
 
 public class SerialAdapter extends BaseAdapter {
@@ -58,5 +60,7 @@ public class SerialAdapter extends BaseAdapter {
 		mImageDownloader.download(mData.get(position).getCoverUrl(), imageView);
 		return convertView;
 	}
+	
+	
 	
 }
