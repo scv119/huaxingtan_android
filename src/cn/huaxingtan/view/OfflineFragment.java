@@ -39,12 +39,11 @@ public class OfflineFragment extends ListFragment {
 	
 	public static final String EXTRA = "AudioItem";
 	
-	@Override 
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
+    public void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+		mFileManager = new FileManager(getActivity());
 		if (mData == null) {
 			mData = new ArrayList<Serial>();
-			mFileManager = new FileManager(getActivity());
 			List<Serial> tmp = mFileManager.getSerials();
 			
 			for (Serial tItem:tmp) {
@@ -62,6 +61,11 @@ public class OfflineFragment extends ListFragment {
 			mAdapter = new SerialAdapter(this.getActivity(), mData);
 			setListAdapter(mAdapter);
 		}
+    }
+	
+	@Override 
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 	}
 	
 	@Override

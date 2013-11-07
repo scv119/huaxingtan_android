@@ -114,11 +114,8 @@ public class FileManager {
 				for (Object key:map.keySet()) {
 					Long iKey = (Long) key;
 					AudioItem item = (AudioItem)map.get(key);
-					if (item.getStatus() == AudioItem.Status.FINISHED) {
-						File file = new File(mContext.getFilesDir(), item.getPath());
-						if (!file.exists() || file.length() != item.getFileSize())
-							item.setStatus(Status.STOPED);
-					}
+					File file = new File(mContext.getFilesDir(), item.getPath());
+					
 					
 					if (item.getStatus() == AudioItem.Status.PAUSED || item.getStatus() == Status.STARTED) {
 						if (this.downloadingIds.get(item.getDownloadId()) != item.getFileId()) {
@@ -126,6 +123,16 @@ public class FileManager {
 							item.setDownloadId(-1);
 						}
 					} else {
+						item.setDownloadId(-1);
+					}
+					
+					if (item.getStatus() == AudioItem.Status.FINISHED) {
+						if (!file.exists() || file.length() != item.getFileSize())
+							item.setStatus(Status.STOPED);
+					}
+					
+					if (file.exists() && file.length() == item.getFileSize()) {
+						item.setStatus(Status.FINISHED);
 						item.setDownloadId(-1);
 					}
 					
@@ -215,6 +222,11 @@ public class FileManager {
 	public void set(AudioItem item) {
 		synchronized(FileManager.class) {
 			audioItemCache.put(item.getFileId(), item);
+			
+			if(!audioItemBySerialIdCache.containsKey(item.getSerialId())) 
+				audioItemBySerialIdCache.put(item.getSerialId(), new HashSet<Long>());
+			audioItemBySerialIdCache.get(item.getSerialId()).add(item.getFileId());
+			
 			if (item.getStatus() == AudioItem.Status.FINISHED ) {
 				Serial serial = serialCache.get(item.getSerialId());
 				Set<Long> list = audioItemBySerialIdCache.get(serial.getId());
@@ -227,9 +239,7 @@ public class FileManager {
 			}
 				
 				
-			if(!audioItemBySerialIdCache.containsKey(item.getSerialId())) 
-				audioItemBySerialIdCache.put(item.getSerialId(), new HashSet<Long>());
-			audioItemBySerialIdCache.get(item.getSerialId()).add(item.getFileId());
+			
 		}
 	}
 	

@@ -22,10 +22,13 @@ import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +49,7 @@ public class DetailActivity extends Activity {
 	private Serial mSerial;
 	private View mHeaderView;
 	private ListView mListView;
-	private List<AudioItem> mData;
+	private List<Long> mData;
 	private boolean mOffline = false;
 
 	private CachedDataProvider mDataProvider;
@@ -54,6 +57,8 @@ public class DetailActivity extends Activity {
 	private DetailAdapter mAdapter;
 	private Handler mHandler;
 	private boolean mRefreshUI;
+	private MusicPlayerService mPlayerService;
+	private long prePlayingId = -1;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +67,9 @@ public class DetailActivity extends Activity {
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		setContentView(R.layout.activity_detail);
-		mData = new ArrayList<AudioItem>();
-		mRefreshUI = true;
+		
+		
+		mData = new ArrayList<Long>();
 		mDataProvider = new CachedDataProvider();
 		mFileManager = new FileManager(this);
 		mHandler = new Handler();
@@ -94,53 +100,70 @@ public class DetailActivity extends Activity {
 		
 		mListView = (ListView)this.findViewById(R.id.detail);
 		mListView.addHeaderView(mHeaderView);
-		mAdapter = new DetailAdapter(this, mData);
-		mListView.setAdapter(mAdapter);
 		
-		if (mOffline) {
-			List<AudioItem> items = mFileManager.getAudioItems(mSerial.getId());
-			for (AudioItem item:items) {
-				if (item.getStatus() == AudioItem.Status.FINISHED)
-					mData.add(item);
-			}
-			mAdapter.notifyDataSetChanged();
-		} else {
-			mDataProvider.getAudiosBySerial(mSerial.getId(), new Callback(){
-	
-				@Override
-				public void success(Object result) {
-					List<AudioItem> list = (List<AudioItem>) result;
-					if (list.size() == 0)
-						return;
-					
-					mData.clear();
-					for (AudioItem o:list) {
-						o = mFileManager.updateByManager(o);
-						mData.add(o);
-					}
-					mAdapter.notifyDataSetChanged();
-					
-				}
-	
-				@Override
-				public void fail(Exception e) {
-				}
-				
-			});
-		}
-		
-		mHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				
-				if (mRefreshUI) {
-					mHandler.postDelayed(this, 200);
-				}
-			}
-			
-		}, 200);
+
+		bindService(new Intent(this,  MusicPlayerService.class),
+				mConn, Context.BIND_AUTO_CREATE);
 		
 	}
+	
+	private ServiceConnection mConn = new ServiceConnection(){
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.i(TAG, "music service connected");
+			mPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
+			mAdapter = new DetailAdapter(DetailActivity.this, mData, mPlayerService);
+			mListView.setAdapter(mAdapter);
+			
+			if (mOffline) {
+				List<AudioItem> items = mFileManager.getAudioItems(mSerial.getId());
+				for (AudioItem item:items) {
+					if (item.getStatus() == AudioItem.Status.FINISHED)
+						mData.add(item.getFileId());
+				}
+				mAdapter.notifyDataSetChanged();
+			} else {
+				mDataProvider.getAudiosBySerial(mSerial.getId(), new Callback(){
+		
+					@Override
+					public void success(Object result) {
+						List<AudioItem> list = (List<AudioItem>) result;
+						if (list.size() == 0)
+							return;
+						
+						mData.clear();
+						for (AudioItem o:list) {
+							o = mFileManager.updateByManager(o);
+							mData.add(o.getFileId());
+						}
+						mAdapter.notifyDataSetChanged();
+						mRefreshUI = true;
+					}
+		
+					@Override
+					public void fail(Exception e) {
+					}
+					
+				});
+			}
+			
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if (mRefreshUI) {
+						refreshUI();
+						mHandler.postDelayed(this, 200);
+					}
+				}
+				
+			}, 200);
+		}
+	
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mPlayerService = null;
+		}
+	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -165,7 +188,14 @@ public class DetailActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		mRefreshUI = false;
+		unbindService(mConn);
 		super.onDestroy();
 	}
 
+	
+	
+	private void refreshUI() {
+		long nowPlayingId = mPlayerService.getNowPlayingId();
+	}
+	
 }

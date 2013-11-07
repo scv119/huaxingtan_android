@@ -111,6 +111,12 @@ public class MusicPlayerService extends Service {
 		return mMediaPlayer.isPlaying();
 	}
 	
+	public long getNowPlayingId() {
+		if (mMediaPlayer.isPlaying() && mAudioItem != null)
+			return mAudioItem.getFileId();
+		return -1;
+	}
+	
 	
 	public class PlayerBinder extends Binder {
 		public MusicPlayerService getService() {
