@@ -109,7 +109,7 @@ public class ImageDownloader {
                 case NO_DOWNLOADED_DRAWABLE:
                     imageView.setMinimumHeight(156);
                     BitmapDownloaderTask task = new BitmapDownloaderTask(imageView);
-                    task.execute(url);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
                     break;
 
                 case CORRECT:
@@ -117,7 +117,7 @@ public class ImageDownloader {
                     DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task);
                     imageView.setImageDrawable(downloadedDrawable);
                     imageView.setMinimumHeight(156);
-                    task.execute(url);
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
                     break;
             }
         }

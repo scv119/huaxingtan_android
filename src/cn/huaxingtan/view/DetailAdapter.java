@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
 
@@ -22,12 +23,14 @@ public class DetailAdapter extends BaseAdapter {
 	private List<AudioItem> mData;
 	private DownloadManager mDownloadManager;
 	private Context mContext;
+	private FileManager mFileManager;
 	
 	public DetailAdapter(Context context, List<AudioItem> data) {
 		this.mInflater = LayoutInflater.from(context);
 		this.mContext = context;
 		this.mData = data;
 		this.mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+		this.mFileManager = new FileManager(mContext);
 	}
 	
 	@Override
@@ -79,7 +82,7 @@ public class DetailAdapter extends BaseAdapter {
 				request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 				request.setTitle(mAudioItem.getName());
 				long id = DetailAdapter.this.mDownloadManager.enqueue(request);
-				DownloadManagerReceiver.addDownloadId(id, mAudioItem.getFileId());
+				mFileManager.addDownloadId(id, mAudioItem.getFileId());
 				mAudioItem.setDownloadId(id);
 			}
 		}

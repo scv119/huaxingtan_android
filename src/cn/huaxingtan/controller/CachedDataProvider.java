@@ -5,16 +5,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
 import cn.huaxingtan.util.JsonAsyncTask;
 
-public enum CachedDataProvider {
-	INSTANCE;
+public class CachedDataProvider {
 	
-	private Map<Integer, Timestamped> mCache = new HashMap<Integer, Timestamped>();
+	private static Map<Integer, Timestamped> mCache = new ConcurrentHashMap<Integer, Timestamped>();
 	private static final String TAG = CachedDataProvider.class.getCanonicalName();
 	
 	public void getSerials(Callback callback) {
@@ -97,7 +97,7 @@ public enum CachedDataProvider {
 		Object value;
 		
 		boolean expired() {
-			return ((new Date()).getTime() - timestamp) < 1000L * 60 *  60;
+			return ((new Date()).getTime() - timestamp) > 1000L * 60 *  60;
 		}
 		
 		Timestamped(Object value) {

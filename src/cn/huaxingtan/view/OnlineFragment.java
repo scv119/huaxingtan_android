@@ -6,6 +6,7 @@ import java.util.List;
 
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
+import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
 import cn.huaxingtan.player.R;
@@ -35,16 +36,20 @@ public class OnlineFragment extends Fragment {
 	private static final String TAG = OnlineFragment.class.getCanonicalName();
 	private List<Serial> mData;
 	private GridItemAdapter mAdapter;
-	private CachedDataProvider mDataProvider = CachedDataProvider.INSTANCE;
+	private CachedDataProvider mDataProvider;
+	private FileManager mFileManager;
 	
 	
 	@Override 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+
+		mDataProvider = new CachedDataProvider();
 		View v = inflater.inflate(R.layout.online_fragment, null);
 		GridView gridView = (GridView) v.findViewById(R.id.grid_view);
 		mData = new ArrayList<Serial>();
 		mAdapter = new GridItemAdapter(inflater, mData);
+		mFileManager = new FileManager(getActivity());
 		gridView.setAdapter(mAdapter);
 		gridView.setOnItemClickListener(new OnItemClickListener(){
 
@@ -77,7 +82,7 @@ public class OnlineFragment extends Fragment {
 				
 				mData.clear();
 				for (Serial o:list) {
-					
+					o = mFileManager.updateByManager(o);
 					mData.add(o);
 					mData.add(o);
 					mData.add(o);

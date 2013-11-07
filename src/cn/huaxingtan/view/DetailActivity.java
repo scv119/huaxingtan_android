@@ -25,6 +25,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,9 +49,11 @@ public class DetailActivity extends Activity {
 	private List<AudioItem> mData;
 	private boolean mOffline = false;
 
-	private CachedDataProvider mDataProvider = CachedDataProvider.INSTANCE;
+	private CachedDataProvider mDataProvider;
 	private FileManager mFileManager;
 	private DetailAdapter mAdapter;
+	private Handler mHandler;
+	private boolean mRefreshUI;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +63,10 @@ public class DetailActivity extends Activity {
 		
 		setContentView(R.layout.activity_detail);
 		mData = new ArrayList<AudioItem>();
+		mRefreshUI = true;
+		mDataProvider = new CachedDataProvider();
 		mFileManager = new FileManager(this);
+		mHandler = new Handler();
 		Intent intent = getIntent();
 		byte[] bytes = (byte[])intent.getExtras().get("Serial");
 		mOffline = intent.getExtras().getBoolean("isOffline");
@@ -109,7 +115,7 @@ public class DetailActivity extends Activity {
 					
 					mData.clear();
 					for (AudioItem o:list) {
-						
+						o = mFileManager.updateByManager(o);
 						mData.add(o);
 					}
 					mAdapter.notifyDataSetChanged();
@@ -122,6 +128,17 @@ public class DetailActivity extends Activity {
 				
 			});
 		}
+		
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				
+				if (mRefreshUI) {
+					mHandler.postDelayed(this, 200);
+				}
+			}
+			
+		}, 200);
 		
 	}
 
@@ -143,6 +160,12 @@ public class DetailActivity extends Activity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	@Override
+	public void onDestroy() {
+		mRefreshUI = false;
+		super.onDestroy();
 	}
 
 }

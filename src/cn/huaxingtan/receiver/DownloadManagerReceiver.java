@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
@@ -13,79 +15,88 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
 public class DownloadManagerReceiver extends BroadcastReceiver{
 	private static final String TAG = DownloadManagerReceiver.class.getCanonicalName();
 	
-	FileManager mFileManager;
-	DownloadManager mDownloadManager;
-	private static Map<Long, Long> downloadingIds = new HashMap<Long, Long>();
+	private FileManager mFileManager;
+	private DownloadManager mDownloadManager;
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if (mFileManager == null) {
-			mFileManager = new FileManager(context);
-			mDownloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-		}
-		long []tmp = new long[downloadingIds.size()];
-		int i = 0;
-		for (Long value:downloadingIds.keySet()) {
-			if (i >= tmp.length)
-				break;
-			tmp[i++] = value;
-		}
-		Cursor c = mDownloadManager.query(new DownloadManager.Query().setFilterById(tmp));
-		if (c == null)
-			return;
-		i = 0;
-		c.moveToFirst();
-		do {
-			parseDownloadStatus(c);
-		} while (c.moveToNext());
-		
+		mFileManager = new FileManager(context);
+		mDownloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+		long []tmp = mFileManager.getDownloadIds();
+		DownloadManager.Query query = new DownloadManager.Query();
+		query.setFilterById(tmp);
+		query.setFilterByStatus(DownloadManager.STATUS_SUCCESSFUL);
+		Cursor c = mDownloadManager.query(query);
+		DownloadAsyncTask task = new DownloadAsyncTask();
+		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, c);
 	};
 	
-	private void parseDownloadStatus(Cursor c) {
+	private  synchronized void parseDownloadStatus(Cursor c) {
 		int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
 		long id    = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID));
-		long fileId = downloadingIds.get(id);
-		String path = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+		final long fileId = mFileManager.getIdByDownloadId(id);
+		
+		final String path = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
 		long bytes = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
 		int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
 		
 		Log.d(TAG, fileId + " status:" + status + " bytes:" + bytes);
 		
-		AudioItem audioItem = mFileManager.getAudioItem(fileId);
+		if (fileId == -1)
+			return;
+		
+		final AudioItem audioItem = mFileManager.getAudioItem(fileId);
 		String message = null;
 		audioItem.setFinishedSize(bytes);
-		if (status == DownloadManager.STATUS_PENDING || status == DownloadManager.STATUS_RUNNING)
-			audioItem.setStatus(Status.STARTED);
-		if (status == DownloadManager.STATUS_PAUSED)
-			audioItem.setStatus(Status.PAUSED);
-		if (status == DownloadManager.STATUS_SUCCESSFUL) {
-			if (!mFileManager.saveTmpFile(path, fileId))
+//		if (status == DownloadManager.STATUS_PENDING || status == DownloadManager.STATUS_RUNNING)
+//			audioItem.setStatus(Status.STARTED);
+//		if (status == DownloadManager.STATUS_PAUSED)
+//			audioItem.setStatus(Status.PAUSED);
+		if (status == DownloadManager.STATUS_FAILED && audioItem.getStatus() != AudioItem.Status.FINISHED 
+				&& mFileManager.getIdByDownloadId(id) >= 0) {
+			mFileManager.removeDownloadId(id);
+			audioItem.setStatus(Status.STOPED);
+			audioItem.setDownloadId(-1);
+			mFileManager.set(audioItem);
+			Log.d(TAG, fileId + " download failed");
+		}
+		if (status == DownloadManager.STATUS_SUCCESSFUL && audioItem.getStatus() != AudioItem.Status.FINISHED
+				&& mFileManager.getIdByDownloadId(id) >= 0) {
+			mFileManager.removeDownloadId(id);
+			if (!mFileManager.saveTmpFile(path, fileId)) {
 				audioItem.setStatus(Status.STOPED);
-			else
+				Log.d(TAG, fileId + " download failed");
+			}
+			else {
 				audioItem.setStatus(Status.FINISHED);
+				Log.d(TAG, fileId + " download finished");
+			}
+			audioItem.setDownloadId(-1);
+			mFileManager.set(audioItem);
 		}
 		
-		if (status == DownloadManager.STATUS_FAILED)
-			audioItem.setStatus(Status.STOPED);
-		
-		notify(fileId, message);
 	}
 	
-	public static synchronized void addDownloadId(long id, long fileId) {
-		downloadingIds.put(id, fileId);
-	}
-	
-	public static synchronized void removeDownloadId(long id) {
-		downloadingIds.remove(id);
-	}
-	
-	private void notify(long fileId, String message) {
-		
+	class DownloadAsyncTask extends AsyncTask<Cursor, Object, Object> {
+
+		@Override
+		protected Object doInBackground(Cursor... params) {
+			Cursor c = params[0];
+			if (c == null)
+				return null;
+			c.moveToFirst();
+			do {
+				parseDownloadStatus(c);
+			} while (c.moveToNext());
+			return null;
+		}
 	}
 	
 }

@@ -148,6 +148,7 @@ public class AudioItem implements Serializable{
 		item.serialId = (int) tmp;
 		item.path = item.fileId + ".mp3";
 		item.status = Status.STOPED;
+		item.downloadId = -1;
 		return item;
 	}
 	
