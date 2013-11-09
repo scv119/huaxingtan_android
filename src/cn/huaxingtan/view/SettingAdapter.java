@@ -2,6 +2,7 @@ package cn.huaxingtan.view;
 
 
 import cn.huaxingtan.player.R;
+import cn.huaxingtan.util.SettingManager;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,14 +16,18 @@ import android.widget.TextView;
 
 public class SettingAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
+	private Context mContext;
 	
 	public SettingAdapter(Context context) {
 		this.mInflater = LayoutInflater.from(context);
+		this.mContext = context;
 	}
+	
+	
 	
 	@Override
 	public int getCount() {
-		return 4;
+		return 2;
 	}
 
 	@Override
@@ -38,21 +43,22 @@ public class SettingAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		
-		if (position < 3)
+		if (position < 1)
 			convertView = mInflater.inflate(R.layout.setting_switch_item, null);
 		else
 			convertView = mInflater.inflate(R.layout.setting_text_item, null);
 		
 		
-		if (position < 3) {
+		if (position < 1) {
 			Switch switzh = (Switch) convertView.findViewById(R.id.setting_switch);
 			int res = R.string.setting_celldata;
-			if (position == 1)
-				res = R.string.setting_backdownload;
-			if (position == 2)
-				res = R.string.setting_backplay;
+//			if (position == 1)
+//				res = R.string.setting_backdownload;
+//			if (position == 2)
+//				res = R.string.setting_backplay;
 			switzh.setText(res);
-			switzh.setOnCheckedChangeListener(new SwitzhListener(position));
+			switzh.setChecked(SettingManager.enableCellular(mContext));
+			switzh.setOnCheckedChangeListener(new SwitzhListener(switzh, position));
 		} else {
 			TextView text = (TextView)convertView.findViewById(R.id.setting_text);
 			text.setText(R.string.setting_feedback);
@@ -70,18 +76,16 @@ public class SettingAdapter extends BaseAdapter {
 	
 	class SwitzhListener implements OnCheckedChangeListener {
 		private int mPos;
-		SwitzhListener (int pos) {
+		private Switch mSwitch;
+		SwitzhListener (Switch instance, int pos) {
 			mPos = pos;
+			mSwitch = instance;
 		}
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView,
 				boolean isChecked) {
 			//TODO setting changed
-			switch(mPos) {
-				default:
-					break;
-			}
-			
+			SettingManager.setEnableCellular(mContext, mSwitch.isChecked());
 		}
 		
 	}

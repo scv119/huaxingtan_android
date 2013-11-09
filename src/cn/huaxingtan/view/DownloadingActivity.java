@@ -6,14 +6,17 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.Serial;
+import cn.huaxingtan.model.AudioItem.Status;
 
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
@@ -43,37 +46,28 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class DetailActivity extends Activity {
-	private static final String TAG = DetailActivity.class.getCanonicalName();
+public class DownloadingActivity extends Activity {
+	private static final String TAG = DownloadingActivity.class.getCanonicalName();
     private static final ImageDownloader mImageDownloader = new ImageDownloader();
     static {
     	mImageDownloader.setMode(Mode.CORRECT);
     }
-	private Serial mSerial;
-	private View mHeaderView;
 	private ListView mListView;
 	private List<Long> mData;
-	private boolean mOffline = false;
 
-	private CachedDataProvider mDataProvider;
 	private FileManager mFileManager;
-	private DetailAdapter mAdapter;
+	private DownloadingAdapter mAdapter;
 	private Handler mHandler;
 	private volatile boolean mRefreshUI = false;
-	private MusicPlayerService mPlayerService;
-	private long prePlayingId = -1;
-	private volatile boolean mUIReady = false;
+	private volatile boolean active = false;
 	private DownloadManager mDownloadManager;
 	private Thread mThread;
-	private ProgressDialog mProgressDialog;
-	public static volatile WeakReference<DetailActivity> running;
+	public static volatile WeakReference<DownloadingActivity> running;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,48 +79,24 @@ public class DetailActivity extends Activity {
 		
 		
 		mData = new ArrayList<Long>();
-		mDataProvider = new CachedDataProvider();
 		mFileManager = new FileManager(this);
 		mHandler = new Handler();
-		Intent intent = getIntent();
-		byte[] bytes = (byte[])intent.getExtras().get("Serial");
-		mOffline = intent.getExtras().getBoolean("isOffline");
-		try {
-			mSerial = (Serial) Serialize.deserialize(bytes);
-		} catch (Exception e) {
-			Log.e(TAG, "fail to deserialize Serial", e);
-		}
 		
-		LayoutInflater inflator = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mHeaderView = inflator.inflate(R.layout.detail_header, null);
-		ImageView imageView = (ImageView) mHeaderView.findViewById(R.id.detail_header_image);
-		imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-		mImageDownloader.download(mSerial.getCoverUrl(), imageView);
 		mDownloadManager = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
+		this.active = true;
 		
-		TextView textView = (TextView) mHeaderView.findViewById(R.id.detail_header_name);
-		TextPaint tp = textView.getPaint(); 
-//		tp.setFakeBoldText(true);
-		textView.setText(mSerial.getName());
-		
-		textView = (TextView) mHeaderView.findViewById(R.id.detail_header_quantity);
-		tp = textView.getPaint(); 
-//		tp.setFakeBoldText(true);
-		textView.setText("共"+mSerial.getQuantity()+"講");
-		textView = (TextView) mHeaderView.findViewById(R.id.detail_header_duration);
-		textView.setText(Misc.formatDuration(mSerial.getDuration()));
-
-		mProgressDialog = ProgressDialog.show(this, "加载数据", "请稍候");
 		mListView = (ListView)this.findViewById(R.id.detail);
-		mListView.addHeaderView(mHeaderView);
+		mAdapter = new DownloadingAdapter(this, mData);
+		mListView.setAdapter(mAdapter);
 		mRefreshUI = true;
+		refreshOfflineUI();
+		
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				if (mRefreshUI) {
 					Log.d(TAG, "refreshing UI");
-					if (mUIReady) {
-						mAdapter.updatePlayingId();
+					if (active) {
 						mAdapter.updateInfoView();
 					}
 					mHandler.postDelayed(this, 200);
@@ -141,10 +111,11 @@ public class DetailActivity extends Activity {
 				while(mRefreshUI) {
 					Log.d(TAG, "updating data");
 					try {
-						if (mUIReady)
+						if (active) {
 							updateDownloadData();
+						}
 					} catch (Exception e) {
-						Log.e(TAG, "download data update failed", e);
+						Log.i(TAG, "download data update failed", e);
 					}
 					try {
 						Thread.sleep(200);
@@ -156,62 +127,10 @@ public class DetailActivity extends Activity {
 		});
 		
 		mThread.start();
-		
-
-		bindService(new Intent(this,  MusicPlayerService.class),
-				mConn, Context.BIND_AUTO_CREATE);
-		
-		
 	}
 	
-	private ServiceConnection mConn = new ServiceConnection(){
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			Log.i(TAG, "music service connected");
-			mPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
-			mAdapter = new DetailAdapter(DetailActivity.this, mData, mPlayerService);
-			mListView.setAdapter(mAdapter);
-			
-			if (mOffline) {
-				refreshOfflineUI();
-				mProgressDialog.dismiss();
-			} else {
-				mDataProvider.getAudiosBySerial(mSerial.getId(), new Callback(){
-		
-					@Override
-					public void success(Object result) {
-						List<AudioItem> list = (List<AudioItem>) result;
-						if (list.size() == 0)
-							return;
-						
-						mData.clear();
-						for (AudioItem o:list) {
-							o = mFileManager.updateByManager(o);
-							mData.add(o.getFileId());
-						}
-						mAdapter.notifyDataSetChanged();
-						mProgressDialog.dismiss();
-						mUIReady = true;
-					}
-		
-					@Override
-					public void fail(Exception e) {
-						Toast.makeText(DetailActivity.this, "网络错误，加载失败",
-							     Toast.LENGTH_SHORT).show();
-						mProgressDialog.dismiss();
-					}
-					
-				});
-			}
-			
-
-		}
 	
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mPlayerService = null;
-		}
-	};
+			
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -224,36 +143,41 @@ public class DetailActivity extends Activity {
 		downloadItem.setOnMenuItemClickListener(new OnMenuItemClickListener(){
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
-				Intent intent = new Intent(DetailActivity.this, DownloadingActivity.class);
+				Intent intent = new Intent(DownloadingActivity.this, DownloadingActivity.class);
 				startActivity(intent);
 				return true;
 			}
 		});
 		
+		downloadItem.setVisible(false);
+		
 		return super.onCreateOptionsMenu(menu);
 	}
 	
 	public void refreshOfflineUI() {
-		if (mOffline) {
-			mData.clear();
-			List<AudioItem> items = mFileManager.getAudioItems(mSerial.getId());
-			for (AudioItem item:items) {
-				if (item.getStatus() == AudioItem.Status.FINISHED)
-					mData.add(item.getFileId());
+		mData.clear();
+		Set<Long> set = new HashSet<Long>();
+		long[] downloadIds = mFileManager.getDownloadIds();
+		for (long dId:downloadIds) {
+			long fileId = mFileManager.getIdByDownloadId(dId);
+			AudioItem item = mFileManager.getAudioItem(fileId);
+			if (item.getStatus() == Status.STARTED && !set.contains(fileId)) {
+				mData.add(fileId);
+				set.add(fileId);
 			}
-			mHandler.post(new Runnable(){
-
-				@Override
-				public void run() {
-					mAdapter.notifyDataSetChanged();
-				}
-				
-			});
 		}
+		mHandler.post(new Runnable(){
+			@Override
+			public void run() {
+				mAdapter.notifyDataSetChanged();
+			}
+			
+		});
 	}
 	
 	public void onPause() {
 		super.onPause();
+		this.active = false;
 		if (running != null)
 			running.clear();
 		running = null;
@@ -262,7 +186,8 @@ public class DetailActivity extends Activity {
 	public void onResume(){
 		super.onResume();
 		this.refreshOfflineUI();
-		running = new WeakReference<DetailActivity>(this);
+		this.active = true;
+		running = new WeakReference<DownloadingActivity>(this);
 	}
 	
 	@Override
@@ -278,7 +203,6 @@ public class DetailActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		mRefreshUI = false;
-		unbindService(mConn);
 		super.onDestroy();
 	}
 

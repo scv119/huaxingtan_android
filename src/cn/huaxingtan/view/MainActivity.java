@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 
 public class MainActivity extends Activity {
 	private Menu mMenu;
@@ -49,6 +50,16 @@ public class MainActivity extends Activity {
 		
 		MenuItem settingItem = menu.findItem(R.id.action_settings);
 		settingItem.setOnMenuItemClickListener(new OnSettingClickedListener(this));
+		
+		MenuItem downloadItem = menu.findItem(R.id.action_download);
+		downloadItem.setOnMenuItemClickListener(new OnMenuItemClickListener(){
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				Intent intent = new Intent(MainActivity.this, DownloadingActivity.class);
+				startActivity(intent);
+				return true;
+			}
+		});
 		
 		return super.onCreateOptionsMenu(menu);
 	}

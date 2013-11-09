@@ -39,6 +39,11 @@
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name="cn.huaxingtan.view.DownloadingActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/download_actvity_name" >
+        </activity>
         <service 
             android:name="cn.huaxingtan.service.MusicPlayerService">
         </service>

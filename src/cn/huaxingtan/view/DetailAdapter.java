@@ -8,18 +8,23 @@ import cn.huaxingtan.player.R;
 import cn.huaxingtan.receiver.DownloadManagerReceiver;
 import cn.huaxingtan.service.MusicPlayerService;
 import cn.huaxingtan.util.Misc;
+import cn.huaxingtan.util.SettingManager;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.text.TextPaint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.AudioItem.Status;
@@ -61,7 +66,7 @@ public class DetailAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View convertView, ViewGroup parent) {
 		if (convertView == null)
 			convertView = mInflater.inflate(R.layout.detail_item, null);
 		mView2Pos.put(convertView, position);
@@ -92,6 +97,16 @@ public class DetailAdapter extends BaseAdapter {
 		
 		TextView infoView = (TextView) convertView.findViewById(R.id.detial_button_text);
 		updateInfoView(infoView, mData.get(position));
+		
+		convertView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Long fildId = mData.get(position);
+				Intent intent = new Intent(mContext, MusicPlayerActivity.class);
+				intent.putExtra("fileId", fildId);
+				mContext.startActivity(intent);
+			}
+		});
 		return convertView;
 	}
 	
@@ -128,13 +143,9 @@ public class DetailAdapter extends BaseAdapter {
 	
 	class ButtonOnClickListener implements View.OnClickListener {
 		private Long mId;
-		private ImageButton mButton;
-		private boolean mIsFinishButton;
 		
 		ButtonOnClickListener(Long id, ImageButton button, boolean isFinishButton) {
 			mId = id;
-			mButton = button;
-			mIsFinishButton = isFinishButton;
 		}
 		@Override
 		public void onClick(View v) {
@@ -144,6 +155,7 @@ public class DetailAdapter extends BaseAdapter {
 				DownloadManager.Request request = new DownloadManager.Request(uri);
 				request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 				request.setTitle(item.getName());
+				request.setAllowedNetworkTypes(SettingManager.getAllowNetworkType(mContext));
 				long id = DetailAdapter.this.mDownloadManager.enqueue(request);
 				mFileManager.addDownloadId(id, item.getFileId());
 				item.setDownloadId(id);

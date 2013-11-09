@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
@@ -25,18 +26,20 @@ import android.widget.SeekBar;
 
 public class MusicPlayerActivity extends Activity implements OnPreparedListener, OnBufferingUpdateListener{
 	private static final String TAG = MusicPlayerActivity.class.getCanonicalName();
-	private AudioItem mAudioItem;
+	private Long fileId;
 	private MusicPlayerService mPlayerService;
 	private SeekBar mSeekBar;
 	private Handler mHandler;
 	private boolean mRefreshUI;
+	private FileManager mFileManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
+		mFileManager = new FileManager(this);
 		Intent musicIntent = getIntent();
-		mAudioItem = (AudioItem)musicIntent.getExtras().get("AudioItem");
+		fileId = musicIntent.getExtras().getLong("fileId");
 
 		setContentView(R.layout.activity_music_player);
 		mSeekBar = (SeekBar)findViewById(R.id.music_seekBar);
@@ -53,7 +56,7 @@ public class MusicPlayerActivity extends Activity implements OnPreparedListener,
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			Log.i(TAG, "service connected");
 			mPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
-			mPlayerService.setAudioItem(mAudioItem, MusicPlayerActivity.this, null, null, MusicPlayerActivity.this, null);
+			mPlayerService.setAudioItem(mFileManager.getAudioItem(fileId), MusicPlayerActivity.this, null, null, MusicPlayerActivity.this, null);
 			
 			mHandler.postDelayed(new Runnable() {
 				@Override

@@ -56,26 +56,12 @@ public class MusicPlayerService extends Service {
 			OnBufferingUpdateListener onBufferingUpdateListener,
 			OnCompletionListener onCompletionListener) {
 		
-		mMediaPlayer.reset();
-		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		mAudioItem = item;
-		String URI = mAudioItem.getFileUrl();
-		if (mAudioItem.getStatus() == Status.FINISHED)
-			URI = mAudioItem.getPath();
-		try {
-			mMediaPlayer.setDataSource(URI);
-		} catch (Exception e) {
-			Log.d(TAG, "failed to load "+URI, e);
-			return false;
-		}
-		
 		if (onPreparedListener != null)
 			mMediaPlayer.setOnPreparedListener(onPreparedListener);
 
 		if (onErrorListener != null)
 			mMediaPlayer.setOnErrorListener(onErrorListener);
 
-		mMediaPlayer.prepareAsync();
 		
 		if (onBufferingUpdateListener != null)
 			mMediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
@@ -85,6 +71,24 @@ public class MusicPlayerService extends Service {
 		
 		if (onCompletionListener != null)
 			mMediaPlayer.setOnCompletionListener(onCompletionListener);
+		
+		if (getNowPlayingId() != item.getFileId()) {
+			mMediaPlayer.reset();
+			mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+			mAudioItem = item;
+			String URI = mAudioItem.getFileUrl();
+			if (mAudioItem.getStatus() == Status.FINISHED)
+				URI = mAudioItem.getPath();
+			try {
+				mMediaPlayer.setDataSource(URI);
+			} catch (Exception e) {
+				Log.d(TAG, "failed to load "+URI, e);
+				return false;
+			}
+
+			mMediaPlayer.prepareAsync();
+		}
+		
 		
 		return true;
 	}
