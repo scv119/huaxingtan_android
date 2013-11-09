@@ -55,6 +55,11 @@ public class CachedDataProvider {
 		
 		@Override
 		protected void onPostExecute(Object result) {
+			if (result == null) {
+				this.mCallback.fail(new Exception("load failed"));
+				return;
+			}
+			
 			List<Object> list = (List<Object>) result;
 			List<Serial> serials = new ArrayList<Serial>();
 			for (Object o:list) {
@@ -76,6 +81,10 @@ public class CachedDataProvider {
 		
 		@Override
 		protected void onPostExecute(Object result) {
+			if (result == null) {
+				this.mCallback.fail(new Exception("load failed"));
+				return;
+			}
 			List<Object> list = (List<Object>) result;
 			Map<Integer, List<AudioItem>> map = new HashMap<Integer, List<AudioItem>>();
 			for (Object o:list) {

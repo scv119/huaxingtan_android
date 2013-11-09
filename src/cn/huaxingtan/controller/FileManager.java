@@ -89,13 +89,14 @@ public class FileManager {
 				DownloadManager.Query query = new DownloadManager.Query().setFilterById(ids);
 				Cursor c = mDownloadManager.query(query);
 				if (c != null) {
-					c.moveToFirst();
+					if (c.moveToFirst())
 					do{
 						int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
 						long id    = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID));
 						if ((status & (DownloadManager.STATUS_PAUSED | DownloadManager.STATUS_PENDING | DownloadManager.STATUS_RUNNING)) != 0)
 							downloadingIds.put(id, map.get(id));
 					} while (c.moveToNext());
+					c.close();
 				}
 			}
 		}
@@ -118,7 +119,8 @@ public class FileManager {
 					
 					
 					if (item.getStatus() == AudioItem.Status.PAUSED || item.getStatus() == Status.STARTED) {
-						if (this.downloadingIds.get(item.getDownloadId()) != item.getFileId()) {
+						if (!downloadingIds.containsKey(item.getDownloadId()) ||
+								item.getFileId() != downloadingIds.get(item.getDownloadId()) ) {
 							item.setStatus(Status.STOPED);
 							item.setDownloadId(-1);
 						}
@@ -237,8 +239,6 @@ public class FileManager {
 					}
 				serial.setDownloaded(count);
 			}
-				
-				
 			
 		}
 	}

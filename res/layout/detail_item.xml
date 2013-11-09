@@ -39,12 +39,35 @@
 
      <ImageButton
         android:id="@+id/detail_item_button"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="15dp"
+        android:layout_marginRight="10dp"
         android:layout_centerVertical="true"
-        android:src="@drawable/download"
+        android:src="@drawable/download_selector"
         android:background="#00000000" />
+     
+     <ImageButton
+        android:id="@+id/detail_finish_button"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/download_finish_selector"
+        android:background="#00000000" />
+
+     <TextView
+         android:id="@+id/detial_button_text"
+         android:layout_width="56dp"
+         android:layout_height="13dp"
+       	 android:layout_alignParentRight="true"
+       	 android:layout_alignParentBottom="true"
+       	 android:layout_marginBottom="2dp"
+         android:layout_marginRight="0dp"
+         android:text=""
+         android:textColor="@android:color/black"
+         android:textAlignment="center"
+         android:textSize="10dp" />
 
 </RelativeLayout>

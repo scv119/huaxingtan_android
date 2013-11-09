@@ -16,6 +16,7 @@ import cn.huaxingtan.util.Serialize;
 
 import android.app.Fragment;
 import android.app.ListFragment;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +32,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class OnlineFragment extends Fragment {
 	private static final String TAG = OnlineFragment.class.getCanonicalName();
@@ -38,6 +40,7 @@ public class OnlineFragment extends Fragment {
 	private GridItemAdapter mAdapter;
 	private CachedDataProvider mDataProvider;
 	private FileManager mFileManager;
+	private ProgressDialog mProgressDialog;
 	
 	
 	@Override 
@@ -51,6 +54,7 @@ public class OnlineFragment extends Fragment {
 		mAdapter = new GridItemAdapter(inflater, mData);
 		mFileManager = new FileManager(getActivity());
 		gridView.setAdapter(mAdapter);
+		mProgressDialog = ProgressDialog.show(getActivity(), "加载数据", "请稍候");
 		gridView.setOnItemClickListener(new OnItemClickListener(){
 
 			@Override
@@ -89,17 +93,27 @@ public class OnlineFragment extends Fragment {
 					mData.add(o);
 				}
 				mAdapter.notifyDataSetChanged();
-				
+				mProgressDialog.dismiss();
 			}
 
 			@Override
 			public void fail(Exception e) {
+				Toast.makeText(getActivity(), "网络错误，加载失败",
+					     Toast.LENGTH_SHORT).show();
+				mProgressDialog.dismiss();
 			}
 			
 		});
 		
 		return v;
 		
+	}
+	
+	@Override
+	public void onResume() {
+		if (mAdapter != null)
+			mAdapter.notifyDataSetChanged();
+		super.onResume();
 	}
 	
 	@Override

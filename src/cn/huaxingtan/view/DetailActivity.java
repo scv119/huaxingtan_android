@@ -2,8 +2,12 @@ package cn.huaxingtan.view;
 
 import java.io.IOException;
 import java.io.StreamCorruptedException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
@@ -14,6 +18,7 @@ import cn.huaxingtan.model.Serial;
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
 import cn.huaxingtan.util.ImageDownloader;
+import cn.huaxingtan.util.Misc;
 import cn.huaxingtan.util.Serialize;
 import cn.huaxingtan.util.ImageDownloader.Mode;
 import android.app.ActionBar;
@@ -22,10 +27,12 @@ import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,6 +46,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DetailActivity extends Activity {
 	private static final String TAG = DetailActivity.class.getCanonicalName();
@@ -56,9 +64,14 @@ public class DetailActivity extends Activity {
 	private FileManager mFileManager;
 	private DetailAdapter mAdapter;
 	private Handler mHandler;
-	private boolean mRefreshUI;
+	private volatile boolean mRefreshUI = false;
 	private MusicPlayerService mPlayerService;
 	private long prePlayingId = -1;
+	private volatile boolean mUIReady = false;
+	private DownloadManager mDownloadManager;
+	private Thread mThread;
+	private ProgressDialog mProgressDialog;
+	public static volatile WeakReference<DetailActivity> running;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +100,7 @@ public class DetailActivity extends Activity {
 		ImageView imageView = (ImageView) mHeaderView.findViewById(R.id.detail_header_image);
 		imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 		mImageDownloader.download(mSerial.getCoverUrl(), imageView);
+		mDownloadManager = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
 		
 		TextView textView = (TextView) mHeaderView.findViewById(R.id.detail_header_name);
 		TextPaint tp = textView.getPaint(); 
@@ -97,9 +111,49 @@ public class DetailActivity extends Activity {
 		tp = textView.getPaint(); 
 //		tp.setFakeBoldText(true);
 		textView.setText("共"+mSerial.getQuantity()+"講");
-		
+		textView = (TextView) mHeaderView.findViewById(R.id.detail_header_duration);
+		textView.setText(Misc.formatDuration(mSerial.getDuration()));
+
+		mProgressDialog = ProgressDialog.show(this, "加载数据", "请稍候");
 		mListView = (ListView)this.findViewById(R.id.detail);
 		mListView.addHeaderView(mHeaderView);
+		mRefreshUI = true;
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if (mRefreshUI) {
+					Log.d(TAG, "refreshing UI");
+					if (mUIReady) {
+						mAdapter.updatePlayingId();
+						mAdapter.updateInfoView();
+					}
+					mHandler.postDelayed(this, 200);
+				}
+			}
+			
+		}, 200);
+		
+		mThread = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				while(mRefreshUI) {
+					Log.d(TAG, "updating data");
+					try {
+						if (mUIReady)
+							updateDownloadData();
+					} catch (Exception e) {
+						Log.e(TAG, "download data update failed", e);
+					}
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						Log.e(TAG, "download data thread interrupted", e);
+					}
+				}
+			}
+		});
+		
+		mThread.start();
 		
 
 		bindService(new Intent(this,  MusicPlayerService.class),
@@ -116,12 +170,8 @@ public class DetailActivity extends Activity {
 			mListView.setAdapter(mAdapter);
 			
 			if (mOffline) {
-				List<AudioItem> items = mFileManager.getAudioItems(mSerial.getId());
-				for (AudioItem item:items) {
-					if (item.getStatus() == AudioItem.Status.FINISHED)
-						mData.add(item.getFileId());
-				}
-				mAdapter.notifyDataSetChanged();
+				refreshOfflineUI();
+				mProgressDialog.dismiss();
 			} else {
 				mDataProvider.getAudiosBySerial(mSerial.getId(), new Callback(){
 		
@@ -137,26 +187,21 @@ public class DetailActivity extends Activity {
 							mData.add(o.getFileId());
 						}
 						mAdapter.notifyDataSetChanged();
-						mRefreshUI = true;
+						mProgressDialog.dismiss();
+						mUIReady = true;
 					}
 		
 					@Override
 					public void fail(Exception e) {
+						Toast.makeText(DetailActivity.this, "网络错误，加载失败",
+							     Toast.LENGTH_SHORT).show();
+						mProgressDialog.dismiss();
 					}
 					
 				});
 			}
 			
-			mHandler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					if (mRefreshUI) {
-						refreshUI();
-						mHandler.postDelayed(this, 200);
-					}
-				}
-				
-			}, 200);
+
 		}
 	
 		@Override
@@ -173,6 +218,38 @@ public class DetailActivity extends Activity {
 		settingItem.setOnMenuItemClickListener(new OnSettingClickedListener(this));
 		
 		return super.onCreateOptionsMenu(menu);
+	}
+	
+	public void refreshOfflineUI() {
+		if (mOffline) {
+			mData.clear();
+			List<AudioItem> items = mFileManager.getAudioItems(mSerial.getId());
+			for (AudioItem item:items) {
+				if (item.getStatus() == AudioItem.Status.FINISHED)
+					mData.add(item.getFileId());
+			}
+			mHandler.post(new Runnable(){
+
+				@Override
+				public void run() {
+					mAdapter.notifyDataSetChanged();
+				}
+				
+			});
+		}
+	}
+	
+	public void onPause() {
+		super.onPause();
+		if (running != null)
+			running.clear();
+		running = null;
+	}
+	
+	public void onResume(){
+		super.onResume();
+		this.refreshOfflineUI();
+		running = new WeakReference<DetailActivity>(this);
 	}
 	
 	@Override
@@ -194,8 +271,40 @@ public class DetailActivity extends Activity {
 
 	
 	
-	private void refreshUI() {
-		long nowPlayingId = mPlayerService.getNowPlayingId();
+	private void updateDownloadData() {
+		long[] downloadids = new long[mData.size()];
+		Arrays.fill(downloadids, -1);
+		int i = 0;
+		for (Long id:mData) {
+			AudioItem item = mFileManager.getAudioItem(id);
+			if (item.getStatus() == AudioItem.Status.STARTED) {
+				downloadids[i++] = item.getDownloadId();
+			}
+		}
+		
+		DownloadManager.Query query = new DownloadManager.Query();
+		query.setFilterById(downloadids);
+		query.setFilterByStatus( DownloadManager.STATUS_PAUSED |
+				DownloadManager.STATUS_PENDING | DownloadManager.STATUS_RUNNING);
+		Cursor c = mDownloadManager.query(query);
+		if (c != null) {
+			if (c.moveToFirst()) {
+				do {
+					int status =  c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
+					long id    = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID));
+					final long fileId = mFileManager.getIdByDownloadId(id);
+					long bytes = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+					AudioItem aitem = mFileManager.getAudioItem(fileId);
+					if (aitem != null) {
+						aitem.setFinishedSize(bytes);
+						Log.d(TAG, fileId + " downloaded " + bytes + " percentage: " + (100.0f * bytes / aitem.getFileSize()));
+					}
+				} while(c.moveToNext());
+			}
+			c.close();
+		}
+		
+		
 	}
 	
 }

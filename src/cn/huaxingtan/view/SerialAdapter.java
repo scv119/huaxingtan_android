@@ -54,7 +54,7 @@ public class SerialAdapter extends BaseAdapter {
 		TextView title = (TextView) convertView.findViewById(R.id.my_item_title);
 		title.setText(mData.get(position).getName());
 		TextView content = (TextView)convertView.findViewById(R.id.my_item_info);
-		content.setText(mData.get(position).getName());
+		content.setText("已下载" + mData.get(position).getDownloaded() + "讲");
 		ImageView imageView = (ImageView) convertView.findViewById(R.id.my_item_image);
 		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		mImageDownloader.download(mData.get(position).getCoverUrl(), imageView);

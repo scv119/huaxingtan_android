@@ -10,6 +10,10 @@ import java.util.concurrent.Executors;
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.AudioItem.Status;
+import cn.huaxingtan.view.DetailActivity;
+import cn.huaxingtan.view.OfflineFragment;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +33,9 @@ public class DownloadManagerReceiver extends BroadcastReceiver{
 	public void onReceive(Context context, Intent intent) {
 		mFileManager = new FileManager(context);
 		mDownloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+		ActivityManager am = (ActivityManager) context.
+		    getSystemService(Activity.ACTIVITY_SERVICE);
+		
 		long []tmp = mFileManager.getDownloadIds();
 		DownloadManager.Query query = new DownloadManager.Query();
 		query.setFilterById(tmp);
@@ -80,6 +87,30 @@ public class DownloadManagerReceiver extends BroadcastReceiver{
 			}
 			audioItem.setDownloadId(-1);
 			mFileManager.set(audioItem);
+			
+			if (audioItem.getStatus() == Status.FINISHED) {
+				OfflineFragment fragment = null;
+				try {
+					if (OfflineFragment.running != null)
+						fragment = OfflineFragment.running.get();
+					if (fragment != null) {
+						fragment.refreshUI();
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "fail to refresh OfflineFragment", e);
+				}
+				
+				DetailActivity detail = null;
+				try {
+					if (DetailActivity.running != null)
+						detail = DetailActivity.running.get();
+					if (detail != null) {
+						detail.refreshOfflineUI();
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "fail to refresh DetailActivity", e);
+				}
+			}
 		}
 		
 	}
@@ -91,10 +122,11 @@ public class DownloadManagerReceiver extends BroadcastReceiver{
 			Cursor c = params[0];
 			if (c == null)
 				return null;
-			c.moveToFirst();
-			do {
-				parseDownloadStatus(c);
-			} while (c.moveToNext());
+			if (c.moveToFirst())
+				do {
+					parseDownloadStatus(c);
+				} while (c.moveToNext());
+			c.close();
 			return null;
 		}
 	}

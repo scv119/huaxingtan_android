@@ -292,7 +292,7 @@ public class ImageDownloader {
         private final WeakReference<BitmapDownloaderTask> bitmapDownloaderTaskReference;
 
         public DownloadedDrawable(BitmapDownloaderTask bitmapDownloaderTask) {
-            super(Color.BLACK);
+            super(Color.TRANSPARENT);
             bitmapDownloaderTaskReference =
                 new WeakReference<BitmapDownloaderTask>(bitmapDownloaderTask);
         }
@@ -394,7 +394,7 @@ public class ImageDownloader {
      * efficiency reasons, the cache will automatically be cleared after a certain inactivity delay.
      */
     public void clearCache() {
-        sHardBitmapCache.clear();
+        //sHardBitmapCache.clear();
         sSoftBitmapCache.clear();
     }
 

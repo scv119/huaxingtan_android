@@ -1,6 +1,7 @@
 package cn.huaxingtan.view;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,37 +38,42 @@ public class OfflineFragment extends ListFragment {
 	private List<Serial> mData;
 	private SerialAdapter mAdapter;
 	private FileManager mFileManager;
-	
+	public static volatile WeakReference<OfflineFragment> running;
 	public static final String EXTRA = "AudioItem";
+	private Handler mHandler;
 	
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
 		mFileManager = new FileManager(getActivity());
-		if (mData == null) {
-			mData = new ArrayList<Serial>();
-			List<Serial> tmp = mFileManager.getSerials();
-			
-			for (Serial tItem:tmp) {
-				if (tItem.getDownloaded() > 0)
-					mData.add(tItem);
-			}
-			
-			Collections.sort(mData, new Comparator<Serial>(){
-
-				@Override
-				public int compare(Serial lhs, Serial rhs) {
-					return lhs.getId() - rhs.getId();
-				}});
-			
-			mAdapter = new SerialAdapter(this.getActivity(), mData);
-			setListAdapter(mAdapter);
-		}
+		mData = new ArrayList<Serial>();
+		mAdapter = new SerialAdapter(this.getActivity(), mData);
+		setListAdapter(mAdapter);
+		mHandler = new Handler();
+		refreshUI();
     }
 	
 	@Override 
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		running = new WeakReference<OfflineFragment>(this);
+		refreshUI();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();		
+		if (running != null)
+			running.clear();
+		running.clear();
+		running = null;
+		refreshUI();
+	}
+	
 	
 	@Override
 	public void onDestroy() {
@@ -89,5 +96,29 @@ public class OfflineFragment extends ListFragment {
 			Log.e(TAG, "fail to serialize", e);
 		}
     }
+	
+	public void refreshUI() {
+		mData.clear();
+		List<Serial> tmp = mFileManager.getSerials();
+		
+		for (Serial tItem:tmp) {
+			if (tItem.getDownloaded() > 0)
+				mData.add(tItem);
+		}
+		
+		Collections.sort(mData, new Comparator<Serial>(){
+
+			@Override
+			public int compare(Serial lhs, Serial rhs) {
+				return lhs.getId() - rhs.getId();
+			}});
+		mHandler.post(new Runnable(){
+			@Override
+			public void run() {
+				mAdapter.notifyDataSetChanged();
+			}
+			
+		});
+	}
 	
 }

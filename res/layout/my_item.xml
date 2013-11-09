@@ -26,9 +26,10 @@
          android:id="@+id/my_item_title"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:layout_alignTop="@+id/my_item_button"
-         android:layout_toRightOf="@+id/my_item_image"
-         android:layout_marginLeft="20dp"
+         android:layout_alignParentLeft="true"
+         android:layout_alignParentTop="true"
+         android:layout_marginLeft="120dp"
+         android:layout_marginTop="20dp"
          android:text="TextView"
          android:textSize="22dp" />
 

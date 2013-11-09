@@ -1,5 +1,6 @@
 package cn.huaxingtan.util;
 
+@Deprecated
 public class BroadcastEvent {
 	public static final String PLAYER_PREPARE_BEGIN = "PLAYER_PREPARE_BEGIN";
 	public static final String PLAYER_PREPARED = "PLAYER_PREPARED";
