@@ -1,5 +1,6 @@
 package cn.huaxingtan.service;
 
+import java.io.File;
 import java.io.IOException;
 
 import cn.huaxingtan.model.AudioItem;
@@ -78,17 +79,20 @@ public class MusicPlayerService extends Service {
 			mAudioItem = item;
 			String URI = mAudioItem.getFileUrl();
 			if (mAudioItem.getStatus() == Status.FINISHED)
-				URI = mAudioItem.getPath();
+				URI = new File(this.getFilesDir(), mAudioItem.getPath()).getAbsolutePath();
+				if(onBufferingUpdateListener!= null)
+					onBufferingUpdateListener.onBufferingUpdate(mMediaPlayer, 100);
 			try {
 				mMediaPlayer.setDataSource(URI);
 			} catch (Exception e) {
 				Log.d(TAG, "failed to load "+URI, e);
 				return false;
 			}
-
 			mMediaPlayer.prepareAsync();
+		} else {
+			if (onPreparedListener!=null)
+				onPreparedListener.onPrepared(mMediaPlayer);
 		}
-		
 		
 		return true;
 	}
@@ -113,6 +117,14 @@ public class MusicPlayerService extends Service {
 	
 	public boolean isPlaying() {
 		return mMediaPlayer.isPlaying();
+	}
+	
+	public boolean seek(double percentage) {
+		long duration = getDuration();
+		if (duration <= 0)
+			return false;
+		mMediaPlayer.seekTo((int)(duration/100.0 * percentage));
+		return true;
 	}
 	
 	public long getNowPlayingId() {
