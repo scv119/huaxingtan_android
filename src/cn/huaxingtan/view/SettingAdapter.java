@@ -1,6 +1,8 @@
 package cn.huaxingtan.view;
 
 
+import com.umeng.fb.FeedbackAgent;
+
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.util.SettingManager;
 import android.content.Context;
@@ -66,7 +68,8 @@ public class SettingAdapter extends BaseAdapter {
 
 				@Override
 				public void onClick(View v) {
-					//TODO feedback
+					FeedbackAgent agent = new FeedbackAgent(mContext);
+				    agent.startFeedbackActivity();
 				}
 				
 			});

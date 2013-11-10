@@ -2,6 +2,8 @@ package cn.huaxingtan.view;
 
 import java.util.List;
 
+import com.umeng.analytics.MobclickAgent;
+
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
 import cn.huaxingtan.model.AudioItem;
@@ -49,6 +51,17 @@ public class MainActivity extends Activity {
 		bindService(new Intent(this,  MusicPlayerService.class),
 				mConn, Context.BIND_AUTO_CREATE);
 	}
+	
+	public void onResume() {
+		super.onResume();
+		MobclickAgent.onResume(this);
+		}
+	
+	public void onPause() {
+		super.onPause();
+		MobclickAgent.onResume(this);
+	}
+	
 	
 	private ServiceConnection mConn = new ServiceConnection(){
 		@Override
@@ -163,5 +176,7 @@ public class MainActivity extends Activity {
 
 
 	}
+	
+	
 
 }

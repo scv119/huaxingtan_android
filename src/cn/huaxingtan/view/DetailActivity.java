@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.umeng.analytics.MobclickAgent;
+
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
 import cn.huaxingtan.controller.FileManager;
@@ -277,6 +279,7 @@ public class DetailActivity extends Activity {
 	
 	public void onPause() {
 		super.onPause();
+		MobclickAgent.onPause(this);
 		if (running != null)
 			running.clear();
 		running = null;
@@ -284,6 +287,7 @@ public class DetailActivity extends Activity {
 	
 	public void onResume(){
 		super.onResume();
+		MobclickAgent.onResume(this);
 		this.refreshOfflineUI();
 		running = new WeakReference<DetailActivity>(this);
 	}

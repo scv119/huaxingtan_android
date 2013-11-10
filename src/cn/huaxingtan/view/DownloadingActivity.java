@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.umeng.analytics.MobclickAgent;
+
 import cn.huaxingtan.controller.CachedDataProvider;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
 import cn.huaxingtan.controller.FileManager;
@@ -214,6 +216,7 @@ public class DownloadingActivity extends Activity {
 	
 	public void onPause() {
 		super.onPause();
+		MobclickAgent.onPause(this);
 		this.active = false;
 		if (running != null)
 			running.clear();
@@ -222,6 +225,7 @@ public class DownloadingActivity extends Activity {
 	
 	public void onResume(){
 		super.onResume();
+		MobclickAgent.onResume(this);
 		this.refreshOfflineUI();
 		this.active = true;
 		running = new WeakReference<DownloadingActivity>(this);
@@ -281,5 +285,7 @@ public class DownloadingActivity extends Activity {
 		
 		
 	}
+	
+	
 	
 }

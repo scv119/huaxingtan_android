@@ -9,6 +9,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.umeng.analytics.MobclickAgent;
+
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.AudioItem.Status;
@@ -136,6 +138,17 @@ public class MusicPlayerActivity extends Activity implements OnPreparedListener,
 		});
 		
 	}
+	
+	public void onResume() {
+		super.onResume();
+		MobclickAgent.onResume(this);
+		}
+	
+	public void onPause() {
+		super.onPause();
+		MobclickAgent.onResume(this);
+	}
+	
 	
 	private ServiceConnection mConn = new ServiceConnection(){
 		@Override
