@@ -3,6 +3,7 @@ package cn.huaxingtan.view;
 import java.util.List;
 
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.update.UmengUpdateAgent;
 
 import cn.huaxingtan.controller.FileManager;
 import cn.huaxingtan.controller.CachedDataProvider.Callback;
@@ -35,6 +36,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	    UmengUpdateAgent.update(this);
 		mFileManager = new FileManager(this);
 		setContentView(R.layout.activity_main);
 		final ActionBar bar = getActionBar();
