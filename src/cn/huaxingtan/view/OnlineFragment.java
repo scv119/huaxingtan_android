@@ -88,9 +88,6 @@ public class OnlineFragment extends Fragment {
 				for (Serial o:list) {
 					o = mFileManager.updateByManager(o);
 					mData.add(o);
-					mData.add(o);
-					mData.add(o);
-					mData.add(o);
 				}
 				mAdapter.notifyDataSetChanged();
 				mProgressDialog.dismiss();
