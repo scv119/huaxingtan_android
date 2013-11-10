@@ -35,12 +35,13 @@ public class DetailAdapter extends BaseAdapter {
 	private DownloadManager mDownloadManager;
 	private Context mContext;
 	private FileManager mFileManager;
+	private boolean mOffline;
 
 	private Map<View, Integer> mView2Pos;
 	private MusicPlayerService mPlayer;
 	
 	
-	public DetailAdapter(Context context, List<Long> data, MusicPlayerService musicPlayer) {
+	public DetailAdapter(Context context, List<Long> data, MusicPlayerService musicPlayer, boolean offline) {
 		this.mInflater = LayoutInflater.from(context);
 		this.mContext = context;
 		this.mData = data;
@@ -48,6 +49,7 @@ public class DetailAdapter extends BaseAdapter {
 		this.mFileManager = new FileManager(mContext);
 		this.mPlayer = musicPlayer;
 		this.mView2Pos = new WeakHashMap<View, Integer>();
+		this.mOffline = offline;
 	}
 	
 	@Override
@@ -104,6 +106,7 @@ public class DetailAdapter extends BaseAdapter {
 				Long fildId = mData.get(position);
 				Intent intent = new Intent(mContext, MusicPlayerActivity.class);
 				intent.putExtra("fileId", fildId);
+				intent.putExtra("offline", mOffline);
 				mContext.startActivity(intent);
 			}
 		});
@@ -121,10 +124,10 @@ public class DetailAdapter extends BaseAdapter {
 			while (percentage.length() != 3) {
 				percentage =  " " + percentage;
 			}
-			infoView.setText("下載中"+ percentage + "%");
+			infoView.setText("下载中"+ percentage + "%");
 		} else {
 			infoView.setVisibility(View.VISIBLE);
-			infoView.setText("     已下載");
+			infoView.setText("     已下载");
 		}
 
 	}

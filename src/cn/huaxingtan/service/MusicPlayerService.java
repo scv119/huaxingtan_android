@@ -98,17 +98,22 @@ public class MusicPlayerService extends Service {
 	}
 	
 	public void play() {
-		if (!mMediaPlayer.isPlaying())
+		if (!mMediaPlayer.isPlaying()) {
 			mMediaPlayer.start();
+		}
 	}
 	
 	public void pause() {
-		if (mMediaPlayer.isPlaying())
+		if (mMediaPlayer.isPlaying()) {
 			mMediaPlayer.pause();
+		}
 	}
 	
 	public long getDuration() {
-		return mMediaPlayer.getDuration();
+		long dur =  mMediaPlayer.getDuration();
+		if (dur >= 1380000000L)
+			return 0;
+		return dur;
 	}
 	
 	public long getCurrentPosition() {

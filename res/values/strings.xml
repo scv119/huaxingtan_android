@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">化性談</string> 
+    <string name="app_name">化性谈</string> 
     <string name="download_actvity_name">正在下载</string>
     <string name="action_settings">設置</string>
     <string name="action_download">下載</string>
-    <string name="setting_feedback">反饋建議</string>
-    <string name="setting_celldata">使用移動數據</string>
+    <string name="setting_feedback">反馈建议</string>
+    <string name="setting_celldata">使用移动数据下载</string>
     <string name="setting_backplay">後台播放</string>
     <string name="setting_backdownload">後台下載</string>
     <string name="hello_world">Hello world!</string>

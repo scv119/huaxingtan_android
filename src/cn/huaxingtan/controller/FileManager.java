@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -211,6 +213,7 @@ public class FileManager {
 			for (long id:tmp) {
 				list.add(audioItemCache.get(id));
 			}
+			
 		}
 		return list;
 	}

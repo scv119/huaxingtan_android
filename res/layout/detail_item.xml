@@ -45,6 +45,7 @@
         android:layout_marginRight="10dp"
         android:layout_centerVertical="true"
         android:src="@drawable/download_selector"
+        android:scaleType="center"
         android:focusable="false"
         android:background="#00000000" />
      
@@ -56,6 +57,7 @@
         android:layout_marginRight="10dp"
         android:layout_centerVertical="true"
         android:src="@drawable/download_finish_selector"
+        android:scaleType="center"
         android:focusable="false"
         android:background="#00000000" />
 

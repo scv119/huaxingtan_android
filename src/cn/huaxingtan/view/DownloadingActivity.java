@@ -68,6 +68,8 @@ public class DownloadingActivity extends Activity {
 	private DownloadManager mDownloadManager;
 	private Thread mThread;
 	public static volatile WeakReference<DownloadingActivity> running;
+	private MenuItem mPlayItem;
+	private MusicPlayerService mMusicPlayerService;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +129,21 @@ public class DownloadingActivity extends Activity {
 		});
 		
 		mThread.start();
+		bindService(new Intent(this,  MusicPlayerService.class),
+				mConn, Context.BIND_AUTO_CREATE);
 	}
+	
+	private ServiceConnection mConn = new ServiceConnection(){
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mMusicPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
+			}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mMusicPlayerService = null;
+		}
+	};
 	
 	
 			
@@ -150,6 +166,27 @@ public class DownloadingActivity extends Activity {
 		});
 		
 		downloadItem.setVisible(false);
+		
+		mPlayItem = menu.findItem(R.id.action_play);
+		mPlayItem.setVisible(true);
+		
+		mPlayItem.setOnMenuItemClickListener(new OnMenuItemClickListener(){
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				long fileId = -1;
+				if (mMusicPlayerService != null) {
+					fileId = mMusicPlayerService.getNowPlayingId();
+				}
+				if (fileId != -1) {
+					Intent intent = new Intent(DownloadingActivity.this, MusicPlayerActivity.class);
+					intent.putExtra("fileId", fileId);
+					startActivity(intent);
+					return true;
+				}
+				Toast.makeText(DownloadingActivity.this, "没有播放内容", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+		});
 		
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -203,6 +240,7 @@ public class DownloadingActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		mRefreshUI = false;
+		unbindService(mConn);
 		super.onDestroy();
 	}
 

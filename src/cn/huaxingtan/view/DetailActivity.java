@@ -74,6 +74,7 @@ public class DetailActivity extends Activity {
 	private Thread mThread;
 	private ProgressDialog mProgressDialog;
 	public static volatile WeakReference<DetailActivity> running;
+	private MenuItem mPlayItem;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +170,7 @@ public class DetailActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			Log.i(TAG, "music service connected");
 			mPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
-			mAdapter = new DetailAdapter(DetailActivity.this, mData, mPlayerService);
+			mAdapter = new DetailAdapter(DetailActivity.this, mData, mPlayerService, mOffline);
 			mListView.setAdapter(mAdapter);
 			
 			if (mOffline) {
@@ -229,6 +230,28 @@ public class DetailActivity extends Activity {
 				return true;
 			}
 		});
+		
+		mPlayItem = menu.findItem(R.id.action_play);
+		mPlayItem.setVisible(true);
+		
+		mPlayItem.setOnMenuItemClickListener(new OnMenuItemClickListener(){
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				long fileId = -1;
+				if (mPlayerService != null) {
+					fileId = mPlayerService.getNowPlayingId();
+				}
+				if (fileId != -1) {
+					Intent intent = new Intent(DetailActivity.this, MusicPlayerActivity.class);
+					intent.putExtra("fileId", fileId);
+					startActivity(intent);
+					return true;
+				}
+				Toast.makeText(DetailActivity.this, "没有播放内容", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+		});
+		
 		
 		return super.onCreateOptionsMenu(menu);
 	}

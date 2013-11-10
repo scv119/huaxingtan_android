@@ -1,6 +1,10 @@
 package cn.huaxingtan.view;
 
+import java.util.List;
+
 import cn.huaxingtan.controller.FileManager;
+import cn.huaxingtan.controller.CachedDataProvider.Callback;
+import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.player.R;
 import cn.huaxingtan.service.MusicPlayerService;
 import android.app.ActionBar;
@@ -8,15 +12,23 @@ import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private Menu mMenu;
 	private FileManager mFileManager;
+	private MenuItem mPlayItem;
+	private MusicPlayerService mMusicPlayerService;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +46,27 @@ public class MainActivity extends Activity {
 				.setTabListener(new TabListener<OfflineFragment>(
 						this, "local", OfflineFragment.class)));
 		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		bindService(new Intent(this,  MusicPlayerService.class),
+				mConn, Context.BIND_AUTO_CREATE);
 	}
+	
+	private ServiceConnection mConn = new ServiceConnection(){
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mMusicPlayerService = ((MusicPlayerService.PlayerBinder) service).getService();
+			}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mMusicPlayerService = null;
+		}
+	};
 	
 	@Override
 	public void onDestroy() {
 		mFileManager.save();
+		unbindService(mConn);
+		mMusicPlayerService = null;
 		super.onDestroy();
 	}
 
@@ -61,8 +89,30 @@ public class MainActivity extends Activity {
 			}
 		});
 		
+		mPlayItem = menu.findItem(R.id.action_play);
+		mPlayItem.setVisible(true);
+		
+		mPlayItem.setOnMenuItemClickListener(new OnMenuItemClickListener(){
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				long fileId = -1;
+				if (mMusicPlayerService != null) {
+					fileId = mMusicPlayerService.getNowPlayingId();
+				}
+				if (fileId != -1) {
+					Intent intent = new Intent(MainActivity.this, MusicPlayerActivity.class);
+					intent.putExtra("fileId", fileId);
+					startActivity(intent);
+					return true;
+				}
+				Toast.makeText(MainActivity.this, "没有播放内容", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+		});
+		
 		return super.onCreateOptionsMenu(menu);
 	}
+	
 
 	
 	public static class TabListener<T extends Fragment> implements ActionBar.TabListener {
