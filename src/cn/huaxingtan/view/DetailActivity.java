@@ -113,7 +113,7 @@ public class DetailActivity extends Activity {
 		textView = (TextView) mHeaderView.findViewById(R.id.detail_header_quantity);
 		tp = textView.getPaint(); 
 //		tp.setFakeBoldText(true);
-		textView.setText("共"+mSerial.getQuantity()+"講");
+		textView.setText("共"+mSerial.getQuantity()+"讲");
 		textView = (TextView) mHeaderView.findViewById(R.id.detail_header_duration);
 		textView.setText(Misc.formatDuration(mSerial.getDuration()));
 
