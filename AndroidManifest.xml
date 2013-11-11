@@ -35,7 +35,7 @@
         </activity>
         <activity
             android:name="cn.huaxingtan.view.MusicPlayerActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_music_player">
         </activity>
         <activity
