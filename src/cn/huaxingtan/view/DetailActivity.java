@@ -132,6 +132,8 @@ public class DetailActivity extends Activity {
 				if (mRefreshUI) {
 					Log.d(TAG, "refreshing UI");
 					if (mUIReady) {
+						if (mProgressDialog.isShowing())
+							mProgressDialog.dismiss();
 						mAdapter.updatePlayingId();
 						mAdapter.updateInfoView();
 					}
@@ -273,6 +275,7 @@ public class DetailActivity extends Activity {
 
 				@Override
 				public void run() {
+					mProgressDialog.dismiss();
 					mAdapter.notifyDataSetChanged();
 				}
 				

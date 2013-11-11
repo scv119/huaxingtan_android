@@ -89,8 +89,8 @@ public class OnlineFragment extends Fragment {
 					o = mFileManager.updateByManager(o);
 					mData.add(o);
 				}
-				mAdapter.notifyDataSetChanged();
 				mProgressDialog.dismiss();
+				mAdapter.notifyDataSetChanged();
 			}
 
 			@Override
@@ -108,8 +108,10 @@ public class OnlineFragment extends Fragment {
 	
 	@Override
 	public void onResume() {
-		if (mAdapter != null)
+		if (mAdapter != null) {
+			mProgressDialog.dismiss();
 			mAdapter.notifyDataSetChanged();
+		}
 		super.onResume();
 	}
 	
