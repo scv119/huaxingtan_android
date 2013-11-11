@@ -6,6 +6,7 @@ import java.io.IOException;
 import cn.huaxingtan.model.AudioItem;
 import cn.huaxingtan.model.AudioItem.Status;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -14,8 +15,11 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 public class MusicPlayerService extends Service {
@@ -23,6 +27,8 @@ public class MusicPlayerService extends Service {
 	private MediaPlayer mMediaPlayer = null;
 	private AudioItem mAudioItem = null;
 	private final IBinder mBinder = new PlayerBinder();
+	private WifiLock mWifiLock;
+	private boolean doneBuffering = false;
 
 	
 	@Override
@@ -30,8 +36,13 @@ public class MusicPlayerService extends Service {
 		super.onCreate();
 		if (mMediaPlayer != null)
 			mMediaPlayer.reset();
-		else
+		else {
 			mMediaPlayer = new MediaPlayer();
+			mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+			mWifiLock =  ((WifiManager) getSystemService(Context.WIFI_SERVICE))
+				    .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+			mWifiLock.setReferenceCounted(false);
+		}
 		Log.i(TAG, "music player service started");
 	}
 	
@@ -39,6 +50,7 @@ public class MusicPlayerService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		if (mMediaPlayer != null) {
+			mWifiLock.release();
 			mMediaPlayer.reset();
 			mMediaPlayer.release();
 			mMediaPlayer = null;
@@ -54,7 +66,7 @@ public class MusicPlayerService extends Service {
 			OnPreparedListener onPreparedListener, 
 			OnSeekCompleteListener onSeekCompleteListener, 
 			OnErrorListener onErrorListener,
-			OnBufferingUpdateListener onBufferingUpdateListener,
+			final OnBufferingUpdateListener onBufferingUpdateListener,
 			OnCompletionListener onCompletionListener) {
 		
 		if (onPreparedListener != null)
@@ -62,10 +74,17 @@ public class MusicPlayerService extends Service {
 
 		if (onErrorListener != null)
 			mMediaPlayer.setOnErrorListener(onErrorListener);
-
 		
-		if (onBufferingUpdateListener != null)
-			mMediaPlayer.setOnBufferingUpdateListener(onBufferingUpdateListener);
+		MediaPlayer.OnBufferingUpdateListener bufferListenerProxy = new MediaPlayer.OnBufferingUpdateListener() {
+		    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+		        if(percent == 100)
+		            doneBuffering = true;
+		        if (onBufferingUpdateListener != null)
+		        	onBufferingUpdateListener.onBufferingUpdate(mp, percent);
+		    }
+		};
+		mMediaPlayer.setOnBufferingUpdateListener(bufferListenerProxy);
+		
 		
 		if (onSeekCompleteListener != null)
 			mMediaPlayer.setOnSeekCompleteListener(onSeekCompleteListener);
@@ -78,16 +97,18 @@ public class MusicPlayerService extends Service {
 			mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 			mAudioItem = item;
 			String URI = mAudioItem.getFileUrl();
+			doneBuffering = false;
 			if (mAudioItem.getStatus() == Status.FINISHED)
 				URI = new File(this.getFilesDir(), mAudioItem.getPath()).getAbsolutePath();
-				if(onBufferingUpdateListener!= null)
-					onBufferingUpdateListener.onBufferingUpdate(mMediaPlayer, 100);
+				bufferListenerProxy.onBufferingUpdate(mMediaPlayer, 100);
 			try {
 				mMediaPlayer.setDataSource(URI);
 			} catch (Exception e) {
 				Log.d(TAG, "failed to load "+URI, e);
+				doneBuffering = true;
 				return false;
 			}
+			wifiLock();
 			mMediaPlayer.prepareAsync();
 		} else {
 			if (onPreparedListener!=null)
@@ -148,6 +169,17 @@ public class MusicPlayerService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mBinder;
+	}
+	
+	public void wifiLock() {
+		if (mAudioItem != null && mAudioItem.getStatus() != Status.FINISHED
+				&& !doneBuffering)
+			mWifiLock.acquire();
+	}
+	
+	public void wifiRelease() {
+		doneBuffering = true;
+		mWifiLock.release();
 	}
 
 	

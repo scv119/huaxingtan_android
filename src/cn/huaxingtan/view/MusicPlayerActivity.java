@@ -19,6 +19,7 @@ import cn.huaxingtan.service.MusicPlayerService;
 import cn.huaxingtan.util.Misc;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +43,7 @@ import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -286,6 +290,8 @@ public class MusicPlayerActivity extends Activity implements OnPreparedListener,
 	@Override
 	public boolean onError(MediaPlayer mp, int what, int extra) {
 		Toast.makeText(this, "音乐加载失败", Toast.LENGTH_LONG).show();
+		this.mPlayerService.wifiRelease();
+		mp.reset();
 		return true;
 	}
 
@@ -305,5 +311,21 @@ public class MusicPlayerActivity extends Activity implements OnPreparedListener,
 	            return super.onOptionsItemSelected(item); 
 	    } 
 	}
-
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if(keyCode == KeyEvent.KEYCODE_MENU) {
+	    	LayoutInflater inflater = LayoutInflater.from(this);
+			View dialogView = inflater.inflate(R.layout.setting, null);
+			ListView listView = (ListView) dialogView.findViewById(R.id.setting_list);
+			listView.setAdapter(new SettingAdapter(this));
+			new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Holo_Light))
+					.setTitle(R.string.action_settings)
+					.setView(dialogView)
+					.setPositiveButton(R.string.finish, null)
+					.show();
+			return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}
 }
