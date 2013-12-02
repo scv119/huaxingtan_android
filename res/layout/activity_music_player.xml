@@ -16,11 +16,11 @@
 	    android:layout_above="@+id/music_seekBar"
 	    android:layout_alignParentRight="true"
 	    android:layout_alignParentTop="true"
-	    android:scaleType="center"
+	    android:scaleType="centerCrop"
 	    android:layout_marginTop="0dp"
 	    android:layout_marginLeft="0dp"
 	    android:layout_marginRight="0dp"
-	    android:src="@drawable/icon_playscreen" />
+	    android:src="@drawable/background_android" />
 
     <ImageButton
         android:id="@+id/play_button"
